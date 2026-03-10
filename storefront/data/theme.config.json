@@ -1,0 +1,48 @@
+{
+  "colors": {
+    "primary": "#0A0A0A",
+    "secondary": "#1A1A1A",
+    "accent": "#C8A96E",
+    "accentLight": "#E8C98E",
+    "surface": "#F8F5F0",
+    "surfaceDark": "#121212",
+    "text": "#0A0A0A",
+    "textMuted": "#6B6B6B",
+    "textInverse": "#F8F5F0",
+    "border": "#E2DDD6",
+    "borderDark": "#2A2A2A",
+    "error": "#C0392B",
+    "success": "#27AE60",
+    "warning": "#E67E22",
+    "overlay": "rgba(10,10,10,0.6)"
+  },
+  "typography": {
+    "fontDisplay": "'Cormorant Garamond', Georgia, serif",
+    "fontBody": "'DM Sans', sans-serif",
+    "fontMono": "'DM Mono', monospace"
+  },
+  "spacing": {
+    "xs": "0.25rem",
+    "sm": "0.5rem",
+    "md": "1rem",
+    "lg": "1.5rem",
+    "xl": "2rem",
+    "2xl": "3rem",
+    "3xl": "4rem",
+    "4xl": "6rem"
+  },
+  "radius": {
+    "sm": "2px",
+    "md": "4px",
+    "lg": "8px",
+    "xl": "16px",
+    "full": "9999px"
+  },
+  "shadows": {
+    "sm": "0 1px 3px rgba(0,0,0,0.08)",
+    "md": "0 4px 16px rgba(0,0,0,0.1)",
+    "lg": "0 8px 32px rgba(0,0,0,0.15)",
+    "xl": "0 16px 48px rgba(0,0,0,0.2)"
+  }
+  
+}

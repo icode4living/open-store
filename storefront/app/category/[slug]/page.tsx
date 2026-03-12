@@ -1,8 +1,9 @@
-// app/category/[slug]/page.tsx — Category Page
 'use client';
 import React, { useEffect, useState } from 'react';
 import { ProductCard, Input, type Product } from '@/components/ui';
 import { api } from '@/lib/api';
+import { Navbar, MobileBottomNav } from '@/components/ui';
+import { useParams } from 'next/navigation'
 
 const SORT_OPTIONS = [
   { label: 'Newest', value: 'newest' },
@@ -11,15 +12,16 @@ const SORT_OPTIONS = [
   { label: 'Popular', value: 'popular' },
 ];
 
-export default function CategoryPage({ params }: { params: { slug: string } }) {
+export default function CategoryPage() {
   const [products, setProducts]   = useState<Product[]>([]);
   const [loading, setLoading]     = useState(true);
   const [search, setSearch]       = useState('');
   const [sort, setSort]           = useState('newest');
   const [wishlist, setWishlist]   = useState<Set<string>>(new Set());
   const [cartCount, setCartCount] = useState(0);
-
-  const categoryTitle = params.slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const [wishlistCount] = useState(3);
+const params = useParams<{slug:string}>()
+  const categoryTitle =  params.slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
   useEffect(() => {
     api.getProducts().then((data) => {
@@ -38,20 +40,7 @@ export default function CategoryPage({ params }: { params: { slug: string } }) {
 
   return (
     <>
-      <header className="navbar">
-        <a href="/" className="navbar__logo">Maison</a>
-        <nav><ul className="navbar__nav">
-          {['New In', 'Men', 'Women', 'Cosmetics', 'Sale'].map((item) => (
-            <li key={item}><a href={`/category/${item.toLowerCase()}`}>{item}</a></li>
-          ))}
-        </ul></nav>
-        <div className="navbar__actions">
-          <a href="/checkout" className="navbar__icon-btn" aria-label="Cart">
-            <svg width="20" height="20" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
-            {cartCount > 0 && <span className="navbar__cart-count">{cartCount}</span>}
-          </a>
-        </div>
-      </header>
+          <Navbar cartCount={cartCount} wishlistCount={wishlistCount} />
 
       {/* Page header */}
       <div style={{ background: 'var(--color-primary)', padding: 'var(--space-3xl) 0 var(--space-2xl)' }}>

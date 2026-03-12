@@ -1,4 +1,12 @@
 {
+  "meta": {
+    "storeName": "Maison",
+    "tagline": "Modern Luxury Fashion & Cosmetics",
+    "logoText": "Maison",
+    "faviconURL": "",
+    "supportEmail": "hello@maison.com"
+  },
+
   "colors": {
     "primary": "#0A0A0A",
     "secondary": "#1A1A1A",
@@ -16,11 +24,14 @@
     "warning": "#E67E22",
     "overlay": "rgba(10,10,10,0.6)"
   },
+
   "typography": {
     "fontDisplay": "'Cormorant Garamond', Georgia, serif",
     "fontBody": "'DM Sans', sans-serif",
-    "fontMono": "'DM Mono', monospace"
+    "fontMono": "'DM Mono', monospace",
+    "googleFontsUrl": "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500;600&family=DM+Mono:wght@400;500&display=swap"
   },
+
   "spacing": {
     "xs": "0.25rem",
     "sm": "0.5rem",
@@ -31,6 +42,7 @@
     "3xl": "4rem",
     "4xl": "6rem"
   },
+
   "radius": {
     "sm": "2px",
     "md": "4px",
@@ -38,11 +50,191 @@
     "xl": "16px",
     "full": "9999px"
   },
+
   "shadows": {
     "sm": "0 1px 3px rgba(0,0,0,0.08)",
     "md": "0 4px 16px rgba(0,0,0,0.1)",
     "lg": "0 8px 32px rgba(0,0,0,0.15)",
     "xl": "0 16px 48px rgba(0,0,0,0.2)"
+  },
+
+  "nav": {
+    "links": [
+      { "label": "New In",    "href": "/category/new-in" },
+      { "label": "Men",       "href": "/category/men" },
+      { "label": "Women",     "href": "/category/women" },
+      { "label": "Cosmetics", "href": "/category/cosmetics" },
+      { "label": "Sale",      "href": "/category/sale" },
+      { "label": "Blog",      "href": "/blog" }
+    ]
+  },
+
+  "sections": {
+    "heroBanner": {
+      "enabled": true,
+      "eyebrow": "New Season 2026",
+      "title": "The New Season Awaits",
+      "subtitle": "Discover curated collections that define modern luxury — crafted for those who wear confidence effortlessly.",
+      "backgroundImage": "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=1600&q=85",
+      "backgroundOverlay": "linear-gradient(135deg, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.35) 100%)",
+      "contentAlign": "left",
+      "size": "hero",
+      "cta": {
+        "label": "Explore Collection",
+        "href": "/category/new-in",
+        "variant": "outline"
+      },
+      "ctaSecondary": {
+        "label": "View Lookbook",
+        "href": "/blog",
+        "variant": "ghost"
+      }
+    },
+
+    "categoryChips": {
+      "enabled": true,
+      "categories": [
+        { "label": "All",          "slug": "all" },
+        { "label": "Men",          "slug": "men" },
+        { "label": "Women",        "slug": "women" },
+        { "label": "Accessories",  "slug": "accessories" },
+        { "label": "Cosmetics",    "slug": "cosmetics" },
+        { "label": "New Arrivals", "slug": "new-in" },
+        { "label": "Sale",         "slug": "sale" }
+      ]
+    },
+
+    "featuredProducts": {
+      "enabled": true,
+      "eyebrow": "Featured",
+      "title": "New Arrivals",
+      "body": "Handpicked pieces from our latest collections — where craftsmanship meets contemporary style.",
+      "limit": 8,
+      "ctaLabel": "View All Products",
+      "ctaHref": "/category/all"
+    },
+
+    "editorialGrid": {
+      "enabled": true,
+      "eyebrow": "Shop by Category",
+      "title": "Curated for You",
+      "cards": [
+        {
+          "title": "Men's Collection",
+          "subtitle": "Refined essentials for the modern man",
+          "image": "https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=700&q=80",
+          "href": "/category/men",
+          "ctaLabel": "Shop Now"
+        },
+        {
+          "title": "Women's Collection",
+          "subtitle": "Effortless elegance for every occasion",
+          "image": "https://images.unsplash.com/photo-1469334031218-e382a71b716b?w=700&q=80",
+          "href": "/category/women",
+          "ctaLabel": "Shop Now"
+        },
+        {
+          "title": "Beauty & Cosmetics",
+          "subtitle": "Luxury skincare and cosmetics",
+          "image": "https://images.unsplash.com/photo-1596462502278-27bfdc403348?w=700&q=80",
+          "href": "/category/cosmetics",
+          "ctaLabel": "Explore"
+        }
+      ]
+    },
+
+    "promoBanner": {
+      "enabled": true,
+      "eyebrow": "New Collection",
+      "title": "Luxury Cosmetics",
+      "subtitle": "Discover our exclusive beauty range — where science meets artistry.",
+      "backgroundImage": "https://images.unsplash.com/photo-1512496015851-a90fb38ba796?w=1400&q=80",
+      "backgroundOverlay": "linear-gradient(135deg, rgba(10,10,10,0.75) 0%, rgba(10,10,10,0.35) 100%)",
+      "contentAlign": "left",
+      "size": "lg",
+      "cta": {
+        "label": "Shop Beauty",
+        "href": "/category/cosmetics",
+        "variant": "outline"
+      }
+    },
+
+    "secondaryBanner": {
+      "enabled": false,
+      "eyebrow": "Limited Time",
+      "title": "Summer Sale",
+      "subtitle": "Up to 50% off selected styles.",
+      "backgroundImage": "https://images.unsplash.com/photo-1483985988355-763728e1935b?w=1400&q=80",
+      "backgroundOverlay": "linear-gradient(135deg, rgba(10,10,10,0.6) 0%, rgba(10,10,10,0.2) 100%)",
+      "contentAlign": "center",
+      "size": "sm",
+      "cta": {
+        "label": "Shop Sale",
+        "href": "/category/sale",
+        "variant": "solid"
+      }
+    },
+
+    "featureStrip": {
+      "enabled": true,
+      "items": [
+        { "icon": "🚚", "label": "Free Delivery",   "desc": "On orders over ₦15,000" },
+        { "icon": "↩️", "label": "Easy Returns",    "desc": "30-day return policy" },
+        { "icon": "🔒", "label": "Secure Payment",  "desc": "SSL encrypted checkout" },
+        { "icon": "💎", "label": "Premium Quality", "desc": "Curated luxury pieces" }
+      ]
+    },
+
+    "newsletter": {
+      "enabled": false,
+      "title": "Stay in the loop",
+      "subtitle": "Get early access to new arrivals, exclusive offers, and style guides.",
+      "placeholder": "Your email address",
+      "ctaLabel": "Subscribe",
+      "backgroundStyle": "dark"
+    }
+  },
+
+  "footer": {
+    "tagline": "Modern luxury fashion and cosmetics, crafted for those who live boldly and dress with intention.",
+    "columns": [
+      {
+        "title": "Shop",
+        "links": [
+          { "label": "New In",     "href": "/category/new-in" },
+          { "label": "Men",        "href": "/category/men" },
+          { "label": "Women",      "href": "/category/women" },
+          { "label": "Cosmetics",  "href": "/category/cosmetics" },
+          { "label": "Sale",       "href": "/category/sale" }
+        ]
+      },
+      {
+        "title": "Help",
+        "links": [
+          { "label": "Track Order", "href": "/profile/orders" },
+          { "label": "Returns",     "href": "/returns" },
+          { "label": "Shipping",    "href": "/shipping" },
+          { "label": "FAQ",         "href": "/faq" },
+          { "label": "Contact",     "href": "/contact" }
+        ]
+      },
+      {
+        "title": "Company",
+        "links": [
+          { "label": "About",          "href": "/about" },
+          { "label": "Blog",           "href": "/blog" },
+          { "label": "Careers",        "href": "/careers" },
+          { "label": "Press",          "href": "/press" },
+          { "label": "Sustainability", "href": "/sustainability" }
+        ]
+      }
+    ],
+    "socials": [
+      { "platform": "Instagram", "href": "https://instagram.com" },
+      { "platform": "Twitter",   "href": "https://twitter.com" },
+      { "platform": "TikTok",    "href": "https://tiktok.com" }
+    ],
+    "copyright": "© {year} Maison. All rights reserved.",
+    "footnote": "Designed with intention."
   }
-  
 }

@@ -1,4 +1,3 @@
-// app/profile/page.tsx — Profile Landing Page
 'use client';
 import React, { useState } from 'react';
 import { Navbar, MobileBottomNav } from '@/components/ui';

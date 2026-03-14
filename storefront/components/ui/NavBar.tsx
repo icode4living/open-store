@@ -279,7 +279,7 @@ function MobileSidebar({ isOpen, onClose }: SidebarProps) {
       <aside className={`sidebar-drawer${isOpen ? ' sidebar-drawer--open' : ''}`} aria-label="Navigation menu">
         {/* Header */}
         <div className="sidebar-drawer__header">
-          <a href="/" className="sidebar-drawer__logo" onClick={onClose}>Maison</a>
+          <a href="/" className="sidebar-drawer__logo" onClick={onClose}>Lavada Cosmetics</a>
           <button className="sidebar-drawer__close" onClick={onClose} aria-label="Close menu">
             {iconClose()}
           </button>
@@ -332,7 +332,7 @@ function MobileSidebar({ isOpen, onClose }: SidebarProps) {
 
         {/* Footer */}
         <div className="sidebar-drawer__footer">
-          <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}>© {new Date().getFullYear()} Maison</p>
+          <p style={{ fontSize: '0.7rem', color: 'var(--color-text-muted)', letterSpacing: '0.06em' }}>© {new Date().getFullYear()} Lavada Cosmetics</p>
         </div>
       </aside>
     </>
@@ -358,7 +358,7 @@ export function Navbar({ cartCount = 0, wishlistCount = 0 }: NavbarProps) {
           {iconMenu()}
         </button>
 
-        <a href="/" className="navbar__logo">Maison</a>
+        <a href="/" className="navbar__logo">Lavada Cosmetics</a>
 
         {/* Desktop nav */}
         <nav className="navbar__center">

@@ -136,7 +136,7 @@ export interface ThemeConfig {
 // ─── Defaults (mirrors theme-config.json) used as fallback ───────────────────
 
 const DEFAULT_CONFIG: ThemeConfig = {
-  meta: { storeName: 'Maison', tagline: '', logoText: 'Maison' },
+  meta: { storeName: 'Lavada Cosmetics', tagline: '', logoText: 'Lavada' },
   colors: {
     primary: '#0A0A0A', secondary: '#1A1A1A', accent: '#C8A96E',
     accentLight: '#E8C98E', surface: '#F8F5F0', surfaceDark: '#121212',

@@ -18,9 +18,22 @@ interface Product {
   costPrice: number;
   galleryImages?: GalleryImage[];
 }
+//
+export interface ProductConnection{
+  edges:[
+    {
+      node:Product
+    }
+  ]
+}
+//
+export interface ProductsResponse {
+  data: ProductConnection
+}
 
-export interface ProductsByStoreResponse {
-  data: {
-    productsByStore: Product[];
-  };
+export interface ProductBySlug{
+  productBySlug:Product
+}
+export interface ProductBySlugResponse{
+  data:ProductBySlug
 }

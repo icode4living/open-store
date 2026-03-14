@@ -1,5 +1,8 @@
 import type { Product } from '@/components/ui';
-
+import { GET_PRODUCT, GET_PRODUCT_BY_SLUG } from '@/graph/product';
+import { GET_CATEGORIES, GET_PRODUCT_BY_CATEGORY } from '@/graph/category';
+import { ProductBySlugResponse, ProductConnection, ProductsResponse, type Product as ProductType } from '@/types/product';
+import { createApolloClient } from './appolloClient';
 const MOCK_PRODUCTS_RESPONSE = {
   data: {
     products: [
@@ -37,11 +40,21 @@ function getToken(): string {
 
 export const api = {
   /* ── Products ── */
-  async getProducts(): Promise<typeof MOCK_PRODUCTS_RESPONSE> {
-    // Replace with real call:
-    // return gql(`query { products { id slug name ... } }`);
-    await new Promise((r) => setTimeout(r, 600)); // simulate latency
-    return MOCK_PRODUCTS_RESPONSE;
+  async getProducts(): Promise<ProductConnection | undefined | Error> {
+    try{
+    //create appolo client
+    const client = createApolloClient();
+    const { data, error: gqlError } = await client.query<ProductsResponse>({
+        query: GET_PRODUCT,
+        fetchPolicy: 'network-only',
+      });
+   if (gqlError) return new Error(gqlError.message)
+    return data?.data;
+    }
+    catch(e){
+      throw new Error(e as string)
+
+    }
   },
 
   async getProductBySlug(slug: string): Promise<Product> {

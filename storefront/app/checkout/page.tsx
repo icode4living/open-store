@@ -1,8 +1,8 @@
-// app/checkout/page.tsx — Checkout Page (stepper)
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Button, Input } from '@/components/ui';
-
+import useTheme from '@/lib/useTheme';
+import { Cart } from '@/types/cart';
 type Step = 0 | 1 | 2;
 
 const STEPS = [
@@ -17,25 +17,24 @@ const MOCK_ITEMS = [
   { id: '2', name: 'Men Polo',          price: 10000, qty: 1, img: 'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=200&q=80' },
 ];
 
-function formatNGN(n: number) {
-  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(n);
-}
 
 export default function CheckoutPage() {
   const [step, setStep]   = useState<Step>(0);
   const [coupon, setCoupon] = useState('');
   const [couponApplied, setCouponApplied] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [cartItem, setCartItem] = useState<Cart>()
+  const { config, loading: themeLoading, store } = useTheme();
 
   const [info, setInfo] = useState({
     firstName: '', lastName: '', email: '', phone: '',
     address: '', city: '', state: '',
   });
 
-  const subtotal = MOCK_ITEMS.reduce((acc, i) => acc + i.price * i.qty, 0);
-  const discount = couponApplied ? subtotal * 0.1 : 0;
+  const subtotal = cartItem?.items!.reduce((acc, i) => acc + i.product?.regularPrice * i.quantity, 0);
+  //const discount = couponApplied ? subtotal * 0.1 : 0;
   const shipping  = 2000;
-  const total     = subtotal - discount + shipping;
+  const total     = subtotal //- discount + shipping;
 
   const handleNextStep = async () => {
     setLoading(true);
@@ -44,6 +43,17 @@ export default function CheckoutPage() {
     if (step < 2) setStep((step + 1) as Step);
   };
 
+function formatNGN(n: number) {
+  return new Intl.NumberFormat('en-NG', { style: 'currency', currency: store?.currency, minimumFractionDigits: 0 }).format(n);
+}
+//load cart items
+useEffect(()=>{
+     import('@/lib/api').then(({ api }) =>
+      api.getCart().then(({data})=>{
+        setCartItem(data)
+      })
+     );
+},[])
   return (
     <>
       <header className="navbar">
@@ -81,14 +91,14 @@ export default function CheckoutPage() {
                 <div>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, marginBottom: 'var(--space-xl)' }}>Review Your Order</h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                    {MOCK_ITEMS.map((item) => (
-                      <div key={item.id} style={{ display: 'flex', gap: 'var(--space-lg)', background: 'white', borderRadius: 'var(--radius-lg)', padding: 'var(--space-md)', border: '1px solid var(--color-border)', alignItems: 'center' }}>
-                        <img src={item.img} alt={item.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+                    {cartItem?.items.map((item) => (
+                      <div key={item.product.id} style={{ display: 'flex', gap: 'var(--space-lg)', background: 'white', borderRadius: 'var(--radius-lg)', padding: 'var(--space-md)', border: '1px solid var(--color-border)', alignItems: 'center' }}>
+                        <img src={item.product?.mainImageURL} alt={item.product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
                         <div style={{ flex: 1 }}>
-                          <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{item.name}</p>
-                          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Qty: {item.qty}</p>
+                          <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{item.product.name}</p>
+                          <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Qty: {item.quantity}</p>
                         </div>
-                        <p style={{ fontFamily: 'var(--font-mono)', fontWeight: 500 }}>{formatNGN(item.price * item.qty)}</p>
+                        <p style={{ fontFamily: 'var(--font-mono)', fontWeight: 500 }}>{formatNGN(item.product.price * item.quantity)}</p>
                       </div>
                     ))}
                   </div>

@@ -2,7 +2,8 @@
 
 import Link from 'next/link';
 import React, { useState } from 'react';
-
+import { Product } from '@/types/product';
+/*
 export interface Product {
   id: string;
   slug: string;
@@ -15,18 +16,20 @@ export interface Product {
   stockStatus: string;
   status: string;
 }
-
+*/
 interface ProductCardProps {
   product: Product;
   onAddToCart?: (product: Product) => void;
   onWishlistToggle?: (product: Product) => void;
   wishlisted?: boolean;
+  currency: string;
 }
 
 export const ProductCard: React.FC<ProductCardProps> = ({
   product,
   onAddToCart,
   onWishlistToggle,
+  currency = "NGN",
   wishlisted = false,
 }) => {
   const [hovered, setHovered] = useState(false);
@@ -34,13 +37,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 
   const formattedPrice = new Intl.NumberFormat('en-NG', {
     style: 'currency',
-    currency: 'NGN',
+    currency: currency,
     minimumFractionDigits: 0,
-  }).format(product.salePrice);
+  }).format(product.salePrice ||0.00);
 
-  const hasDiscount = product.costPrice < product.salePrice;
+  const hasDiscount = product.regularPrice ? product.regularPrice < product.salePrice! : false
   const discount = hasDiscount
-    ? Math.round(((product.salePrice - product.costPrice) / product.salePrice) * 100)
+    ? Math.round(((product.regularPrice! - product.salePrice!) / product.salePrice!) * 100)
     : 0;
 
   const imgSrc =
@@ -103,7 +106,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
           <span className="product-card__price">{formattedPrice}</span>
           {hasDiscount && (
             <span className="product-card__cost">
-              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(product.costPrice)}
+              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: currency, minimumFractionDigits: 0 }).format(product.costPrice)}
             </span>
           )}
         </div>

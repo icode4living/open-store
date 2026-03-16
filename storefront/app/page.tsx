@@ -3,8 +3,9 @@
 // is read from useTheme() → config.sections so the CMS/API controls the page.
 'use client';
 import React, { useEffect, useState } from 'react';
-import { ProductCard, type Product } from '@/components/ui/';
+import { ProductCard} from '@/components/ui/';
 import { Navbar, MobileBottomNav } from '@/components/ui';
+import {Product} from '@/types/product'
 import useTheme, {
   type HeroBannerSection,
   type PromoBannerSection,

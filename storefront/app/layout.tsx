@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./styles/globals.css";
 import "./styles/component.css";
-
+import ApolloWrapper from "@/components/ApolloProvider";
 
 
 export const metadata: Metadata = {
@@ -17,11 +17,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        
+      <body 
       >
+        <ApolloWrapper>
         {children}
+        </ApolloWrapper>
       </body>
+      
     </html>
   );
 }

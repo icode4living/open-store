@@ -6,13 +6,13 @@ export interface Category {
   imageURL: string;
 }
 export interface CategoryConnection{
-  edges:[
-    {
-      node:Category
-    }
-  ]
+  categories: Category[]
 }
 
 export interface CategoryResponse{
-  data: CategoryConnection
+  data:{
+    categories: Array<{
+      node: Category;
+    }>;
+  };
 }

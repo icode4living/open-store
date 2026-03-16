@@ -1,102 +1,351 @@
-import type { Product } from '@/components/ui';
-import { GET_PRODUCT, GET_PRODUCT_BY_SLUG } from '@/graph/product';
+import { GET_PRODUCT, GET_PRODUCT_BY_SLUG, PRODUCT_SEARCH } from '@/graph/product';
 import { GET_CATEGORIES, GET_PRODUCT_BY_CATEGORY } from '@/graph/category';
-import { ProductBySlugResponse, ProductConnection, ProductsResponse, type Product as ProductType } from '@/types/product';
+import { Customer } from '@/types/customer';
+import { CREATE_ADDRESS, GET_ADDRESS } from '@/graph/address';
+import { Address, AddressInput, CreateAddressResponse, GetAddressResponse } from '@/types/address';
+import { ProductBySlugResponse, ProductConnection,
+   ProductsByCategoryResponse, ProductSearchResponse, ProductsResponse,
+    type Product  } from '@/types/product';
+import { CustomerOrders, GetOrderItem, GetOrderResponse, Order } from '@/types/order';
+// Cart 
+import { Cart, AddToCartResponse, GetCartResponse, UpdateCartResponse } from '@/types/cart';
+import { GET_CART, UPDATE_CART, ADD_TO_CART } from '@/graph/cart';
+// libraries
 import { createApolloClient } from './appolloClient';
-const MOCK_PRODUCTS_RESPONSE = {
-  data: {
-    products: [
-      { id: '4fc49557-02c3-4d5b-848b-1c075c3c5b72', slug: 'long-sleve', name: 'Long Sleeve', shortDescription: 'Men fitted longsleeve', salePrice: 12000, costPrice: 7500, mainImageURL: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=500&q=80', galleryImages: [], stockStatus: 'instock', status: 'publish', shippingClass: { id: 'd83734ad', name: 'Ibadan Delivery', slug: 'ibadan-delivery' }, description: '<p>Premium quality long sleeve shirt crafted for comfort and style.</p><ul><li>100% cotton</li><li>Machine washable</li><li>Available in all sizes</li></ul>' },
-      { id: '8e0d7e1b-c50a-40ee-ac2b-733ed8ada54a', slug: 't-shirt', name: 'Polo T-Shirt', shortDescription: 'Polo t-shirt for men', salePrice: 5000, costPrice: 4855, mainImageURL: 'https://objectstorage.eu-frankfurt-1.oraclecloud.com/n/frziyyzydojr/b/mysalescat-image/o/product/8e0d7e1b-c50a-40ee-ac2b-733ed8ada54a/22e83083-1a59-4456-b052-3d5f631aebb2.jpg', galleryImages: [{ url: 'https://objectstorage.eu-frankfurt-1.oraclecloud.com/n/frziyyzydojr/b/mysalescat-image/o/product/8e0d7e1b-c50a-40ee-ac2b-733ed8ada54a/e010a0e9-594a-4a38-8f93-7f6e4fd80670.jpg', productID: '8e0d7e1b' }], stockStatus: 'instock', status: 'publish', shippingClass: null, description: '' },
-      { id: '858554fe-537f-419a-8435-d24d2572565d', slug: 'jacket', name: 'Men Jacket', shortDescription: 'Premium fitted jacket', salePrice: 25000, costPrice: 18000, mainImageURL: 'https://images.unsplash.com/photo-1551488831-00ddcb6c6bd3?w=500&q=80', galleryImages: [], stockStatus: 'instock', status: 'publish', shippingClass: null, description: '' },
-      { id: 'c3871ebe-b373-44a9-8b07-1b285d00b194', slug: 'women-gown', name: 'Women Gown', shortDescription: 'Best gown for women', salePrice: 6000, costPrice: 4000, mainImageURL: 'https://images.unsplash.com/photo-1496747611176-843222e1e57c?w=500&q=80', galleryImages: [], stockStatus: 'instock', status: 'publish', shippingClass: null, description: '' },
-      { id: '7b9d85fd-fe3a-4363-aa77-306ca5da4612', slug: 'young-mens-shirt', name: 'Young Men Shirt', shortDescription: 'Casual shirt for young men', salePrice: 8000, costPrice: 5500, mainImageURL: 'https://images.unsplash.com/photo-1620799140408-edc6dcb6d633?w=500&q=80', galleryImages: [], stockStatus: 'instock', status: 'publish', shippingClass: null, description: '' },
-      { id: 'eb5457f2-e8d3-44a3-b9c2-f2e0ad3b41e8', slug: 'women-dress', name: 'Women Dress', shortDescription: 'Elegant dress for women', salePrice: 9500, costPrice: 7000, mainImageURL: 'https://images.unsplash.com/photo-1539109136881-3be0616acf4b?w=500&q=80', galleryImages: [], stockStatus: 'instock', status: 'publish', shippingClass: null, description: '' },
-      { id: 'e59f9343-82c6-4fe4-a8a6-f26bb55afdc8', slug: 'women-original-gown', name: 'Original Gown', shortDescription: 'Original gown for women', salePrice: 10000, costPrice: 5000, mainImageURL: 'https://images.unsplash.com/photo-1515886657613-9f3515b0c78f?w=500&q=80', galleryImages: [], stockStatus: 'instock', status: 'publish', shippingClass: null, description: '' },
-      { id: '13acf5cc-5ec5-469e-8933-3b9e1e379bfb', slug: 'men-polo', name: 'Men Polo', shortDescription: 'Polo shirt for men', salePrice: 10000, costPrice: 10500, mainImageURL: 'https://images.unsplash.com/photo-1503341455253-b2e723bb3dbb?w=500&q=80', galleryImages: [], stockStatus: 'instock', status: 'publish', shippingClass: null, description: '' },
-    ],
-  },
-};
+import { RestClient } from './restClient';
+import { GET_ODERS } from '@/graph/order';
+import { Store, StoreResponse } from '@/types/store';
+import { GET_STORE } from '@/graph/store';
 
-const GRAPHQL_ENDPOINT = process.env.NEXT_PUBLIC_GRAPHQL_URL || '/api/graphql';
-const REST_ENDPOINT    = process.env.NEXT_PUBLIC_API_URL     || '/api';
+const restClient = new RestClient({
+  baseURL : process.env.NEXT_PUBLIC_BASE_URL || "",
+  headers: {
+    'Content-Type': 'application/json',
+  }
+})
 
-async function gql<T>(query: string, variables?: Record<string, unknown>): Promise<T> {
-  const res = await fetch(GRAPHQL_ENDPOINT, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${getToken()}` },
-    body: JSON.stringify({ query, variables }),
-  });
-  if (!res.ok) throw new Error(`GraphQL error: ${res.statusText}`);
-  const { data, errors } = await res.json();
-  if (errors?.length) throw new Error(errors[0].message);
-  return data;
-}
-
-function getToken(): string {
-  if (typeof window === 'undefined') return '';
-  return localStorage.getItem('auth_token') ?? '';
-}
 
 export const api = {
-  /* ── Products ── */
-  async getProducts(): Promise<ProductConnection | undefined | Error> {
-    try{
-    //create appolo client
+ /* ── Products ── */
+ /**
+  * 
+  * @returns @interface Product
+  */
+async getProducts(): Promise<Product[]> {
+  try {
     const client = createApolloClient();
+    
     const { data, error: gqlError } = await client.query<ProductsResponse>({
-        query: GET_PRODUCT,
-        fetchPolicy: 'network-only',
-      });
-   if (gqlError) return new Error(gqlError.message)
-    return data?.data;
+      query: GET_PRODUCT,
+      fetchPolicy: 'network-only',
+    });
+
+    if (gqlError) return new Error(gqlError.message);
+
+    // Extract the nodes from the edges array
+    const products = data?.data?.products?.edges?.map(edge => edge.node) || [];
+
+    return products;
+  } catch (e) {
+    // Standardizing error handling
+    throw new Error(e instanceof Error ? e.message : String(e));
+  }
+},
+// Get user store config
+async getStore(): Promise<Store> {
+  try {
+    const client = createApolloClient();
+    
+    const { data, error: gqlError } = await client.query<StoreResponse>({
+      query: GET_STORE,
+      fetchPolicy: 'network-only',
+    });
+
+    if (gqlError) return new Error(gqlError.message);
+
+    // Extract the nodes from the edges array
+    const store = data?.data?.stores[0]
+
+    return store;
+  } catch (e) {
+    // Standardizing error handling
+    throw new Error(e instanceof Error ? e.message : String(e));
+  }
+},
+/**
+ * 
+ * @param slug 
+ * @returns @interface Product[]
+ */
+  async getProductBySlug(slug: string): Promise<Product> {
+    try{
+    const client = createApolloClient();
+ const { data, error: gqlError } = await client.query<ProductBySlugResponse>({
+      query: GET_PRODUCT_BY_SLUG,
+      variables:{slug:slug},
+      fetchPolicy: 'network-only',
+    });
+        if (gqlError) return new Error(gqlError.message);
+const product = data?.data?.productBySlug
+return product
     }
     catch(e){
-      throw new Error(e as string)
+    throw new Error(e instanceof Error ? e.message : String(e));
 
     }
   },
-
-  async getProductBySlug(slug: string): Promise<Product> {
-    await new Promise((r) => setTimeout(r, 400));
-    const found = MOCK_PRODUCTS_RESPONSE.data.products.find((p) => p.slug === slug);
-    if (!found) throw new Error('Product not found');
-    return found as unknown as Product;
-  },
-
-  /* ── Cart (GraphQL) ── */
-  async addToCart(productID: string, quantity: number) {
-    // return gql(`mutation AddToCart($productID: ID!, $quantity: Int!) { addToCart(productID: $productID, quantity: $quantity) { id items { productID quantity } } }`, { productID, quantity });
-    await new Promise((r) => setTimeout(r, 400));
-    return { data: { addToCart: { id: 'cart-1', items: [{ productID, quantity }] } } };
-  },
-
-  async getCart() {
-    // return gql(`query Mycart { myCart { id items { productID quantity product { id name mainImageURL } } } }`);
-    await new Promise((r) => setTimeout(r, 300));
-    return { data: { myCart: { id: 'cart-1', items: [] } } };
-  },
-
-  async updateCartItem(itemID: string, quantity: number) {
-    // return gql(`mutation UpdateCartItem($itemID: ID!, $quantity: Int!) { updateCartItem(itemID: $itemID, quantity: $quantity) { id items { productID quantity } } }`, { itemID, quantity });
-    await new Promise((r) => setTimeout(r, 300));
-    return { data: { updateCartItem: { id: 'cart-1', items: [] } } };
-  },
-
-  /* ── Customer & Address ── */
-  async createCustomer(data: { email: string; first_name: string; last_name: string; phone: string }) {
-    const res = await fetch(`${REST_ENDPOINT}/customers`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(data),
+  /**
+   * 
+   * @param query 
+   * @returns @interface Product[]
+   */
+  async productSearch(query:string): Promise<Product[] > {
+   try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.query<ProductSearchResponse>({
+      query: PRODUCT_SEARCH,
+      variables:{search:query},
+      fetchPolicy: 'network-only',
     });
-    return res.json();
+        if (gqlError) return new Error(gqlError.message);
+    const resp = data?.data?.productSearch
+    return resp
+
+   }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
+  },
+  /**
+   * 
+   * @param slug 
+   * @returns @interface Product
+   */
+async getProductByCategory(slug:string): Promise<Product[] | Error> {
+  try {
+    const client = createApolloClient();
+    
+    const { data, error: gqlError } = await client.query<ProductsByCategoryResponse>({
+      query: GET_PRODUCT_BY_CATEGORY,
+      variables:{slug:slug},
+      fetchPolicy: 'network-only',
+    });
+
+    if (gqlError) return new Error(gqlError.message);
+
+    // Extract the nodes from the edges array
+    const products = data?.data?.productByCategory?.edges?.map(edge => edge.node) || [];
+
+    return products;
+  } catch (e) {
+    // Standardizing error handling
+    throw new Error(e instanceof Error ? e.message : String(e));
+  }
+},
+  /* ── Cart (GraphQL) ── */
+  /**
+   * 
+   * @param productID 
+   * @param quantity 
+   * @returns @interface Cart
+   */
+  async addToCart(productID: string, quantity: number): Promise<Cart > {
+     try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.mutate<AddToCartResponse>({
+  mutation: ADD_TO_CART,
+  variables:{productID:productID, quantity:quantity}
+});
+    if (gqlError) return new Error(gqlError.message);
+    const cart = data?.data?.addToCart
+    return cart
+     }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+     }
+  },
+/**
+ * 
+ * @returns @interface Cart
+ */
+  async getCart(): Promise<Cart > {
+   try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.query<GetCartResponse>({
+      query: GET_CART,
+      fetchPolicy: 'network-only',
+    });
+        if (gqlError) return new Error(gqlError.message);
+    const cart = data?.data?.myCart
+return cart
+   }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
   },
 
-  async createAddress(input: { firstName: string; lastName: string; city: string; addressLine1: string; customerID: string }) {
-    return gql(
-      `mutation createAddress($input: CreateAddressInput!) { createAddress(input: $input) { id firstName lastName city addressLine1 customer { firstName lastName phone } } }`,
-      { input }
-    );
+  /**
+   * 
+   * @param itemID 
+   * 
+   * @param quantity 
+   * @returns @interface Cart
+   */
+  async updateCartItem(itemID: string, quantity: number): Promise<Cart> {
+    try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.mutate<UpdateCartResponse>({
+  mutation: UPDATE_CART,
+  variables:{itemID:itemID, quantity:quantity}
+});
+    if (gqlError) return new Error(gqlError.message);
+    const cart = data?.data?.updateCartItem
+    return cart
+     }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+     }
+  
+  },
+
+  /* ── Customer ── */
+  /**
+   * 
+   * @param customer 
+   * @returns @interface Customer
+   */
+  async createGuestCustomer(customer:Customer): Promise<Customer | undefined> {
+   try{
+const result = await restClient.post<Customer>('/customers/guest',{
+  data:{
+    customer
+  }
+});
+return result
+   }catch(e){
+    
+    throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
+  },
+/**
+ * 
+ * @param email 
+ * @param password 
+ * @returns @interface Customer
+ */
+  async registerCustomer (email: string, password: string): Promise<Customer | undefined> {
+   try{
+const result = await restClient.post<Customer>('/customers/register',{
+  data:{
+    email,
+    password
+  }
+});
+return result
+   }catch(e){
+    
+    throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
+  },
+
+/** Address */
+/**
+ * 
+ * @param address @interface AddressInput
+ * @returns @interface Address
+ */
+  async createAddress(address:AddressInput): Promise<Address> {
+    try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.mutate<CreateAddressResponse>({
+  mutation: CREATE_ADDRESS,
+  variables:{input:{
+    firstName: address.firstName,
+    lastName: address.lastName,
+    addressLine1: address.addressLine1,
+    ...(address.addressLine2 !=null &&{ addressLine2: address.addressLine2}),
+    city: address.city,
+    postalCode: address.postal,
+    country: address.country,
+    customerID: address.customerID
+
+  }}
+});
+    if (gqlError) return new Error(gqlError.message);
+    const resp = data?.data?.createAddress
+    return resp
+     }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+     }
+  
+  },
+/**
+ * 
+ * @param customerID 
+ * @returns @interface Address[]
+ */
+
+    async getAddress(customerID:string): Promise<Address[] > {
+   try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.query<GetAddressResponse>({
+      query: GET_ADDRESS,
+      variables:{customerID:customerID},
+      fetchPolicy: 'network-only',
+    });
+        if (gqlError) return new Error(gqlError.message);
+    const resp = data?.data?.customerAddresses
+    return resp
+
+   }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
+  },
+  /* Checkout & Orders */
+  /**
+   * 
+   * @param email 
+   * @param paymentMethod 
+   * @returns @interface Order
+   */
+async checkout (email: string, paymentMethod: string): Promise<Order | undefined> {
+   try{
+const result = await restClient.post<Order>('/orders/checkout',{
+  data:{
+    email,
+    paymentMethod
+  }
+});
+return result
+   }catch(e){
+    
+    throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
+  },
+
+//order
+
+    async getOrders(customerID:string): Promise<CustomerOrders[] > {
+   try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.query<GetOrderResponse>({
+      query: GET_ODERS,
+      variables:{customerID:customerID},
+      fetchPolicy: 'network-only',
+    });
+        if (gqlError) return new Error(gqlError.message);
+    const resp = data?.data?.customerOrders
+    return resp
+
+   }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
   },
 }
+

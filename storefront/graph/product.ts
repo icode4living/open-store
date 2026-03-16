@@ -43,3 +43,14 @@ query ProductBySlug($slug:String!){
     }
 }
 `
+export const PRODUCT_SEARCH =  gql`
+query ProductSearch($search:String){
+    productSearch(search:$search){
+        id
+        name
+        slug
+        mainImageURL
+        
+    }
+}
+`;

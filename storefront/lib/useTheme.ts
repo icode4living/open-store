@@ -4,6 +4,8 @@
 // can render banners, editorial grids, feature strips etc. dynamically.
 
 import { useState, useEffect } from 'react';
+import { api } from './api';
+import { Store } from '@/types/store';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -310,26 +312,26 @@ function applyThemeCSS(config: ThemeConfig) {
 const CACHE_KEY = 'maison_theme_v2';
 const CACHE_TTL = 60 * 60 * 1000; // 1 hour
 
-function getCache(): ThemeConfig | null {
+function getCache(): Store | null {
   try {
     const raw = sessionStorage.getItem(CACHE_KEY);
     if (!raw) return null;
     const { config, cachedAt } = JSON.parse(raw);
     if (Date.now() - cachedAt > CACHE_TTL) { sessionStorage.removeItem(CACHE_KEY); return null; }
-    return config as ThemeConfig;
+    return config as Store;
   } catch { return null; }
 }
 
-function setCache(config: ThemeConfig) {
+function setCache(config: Store) {
   try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ config, cachedAt: Date.now() })); }
   catch { /* private/storage full */ }
 }
 
-async function fetchRemoteConfig(): Promise<ThemeConfig | null> {
+async function fetchRemoteConfig(): Promise<Store | null> {
   try {
-    const res = await fetch('/api/theme-config', { cache: 'no-store' });
-    if (!res.ok) throw new Error('not found');
-    return await res.json() as ThemeConfig;
+    const res:Store  = await api.getStore()   //await fetch('/api/theme-config', { cache: 'no-store' });
+    if (!res) throw new Error('not found');
+    return await res as Store;
   } catch { return null; }
 }
 
@@ -355,11 +357,11 @@ function mergeConfig(remote: Partial<ThemeConfig>): ThemeConfig {
 // CSS vars are applied as a side effect.
 
 let _globalConfig: ThemeConfig | null = null; // in-memory singleton for SSR hydration
-
-export function useTheme(): { config: ThemeConfig; loading: boolean } {
+let _store: Store | null = null;
+export function useTheme(): { config: ThemeConfig; loading: boolean, store: Store | null} {
   const [config, setConfig] = useState<ThemeConfig>(_globalConfig ?? DEFAULT_CONFIG);
   const [loading, setLoading] = useState(!_globalConfig);
-
+const [store, setStore] = useState<Store | null>(_store)
   useEffect(() => {
     if (_globalConfig) { applyThemeCSS(_globalConfig); setLoading(false); return; }
 
@@ -367,26 +369,30 @@ export function useTheme(): { config: ThemeConfig; loading: boolean } {
       // 1. Session cache
       const cached = getCache();
       if (cached) {
-        _globalConfig = cached;
-        setConfig(cached);
-        applyThemeCSS(cached);
+        _globalConfig = cached.theme as ThemeConfig;
+        _store = store
+        setStore(cached)
+        setConfig(cached.theme as ThemeConfig);
+        applyThemeCSS(cached.theme as ThemeConfig);
         setLoading(false);
         return;
       }
 
       // 2. Remote fetch
       const remote = await fetchRemoteConfig();
-      const resolved = remote ? mergeConfig(remote) : DEFAULT_CONFIG;
-
+      const resolved = remote?.theme  ? mergeConfig(remote.theme as ThemeConfig) : DEFAULT_CONFIG;
+     // const storeConfig = re
       _globalConfig = resolved;
+      _store=remote
+      setStore(store)
       setConfig(resolved);
       applyThemeCSS(resolved);
-      setCache(resolved);
+      setCache(remote!);
       setLoading(false);
     })();
   }, []);
 
-  return { config, loading };
+  return { config, loading, store};
 }
 
 export { DEFAULT_CONFIG };

@@ -1,13 +1,24 @@
 
 'use client';
+import { Product } from '@/types/product';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-
+type Navs ={
+  label: string;
+  href:string;
+}
+type Category ={
+  label:string;
+  href:string;
+  icon?: string;
+}
 export interface NavbarProps {
   cartCount?: number;
   wishlistCount?: number;
+  category?:Category[];
+  navs?:Navs[];
 }
 
-const NAV_LINKS = [
+const NAV_LINKS: Navs[] = [
   { label: 'New In',    href: '/category/new-in' },
   { label: 'Men',       href: '/category/men' },
   { label: 'Women',     href: '/category/women' },
@@ -16,7 +27,7 @@ const NAV_LINKS = [
   { label: 'Blog',      href: '/blog' },
 ];
 
-const CATEGORIES = [
+const CATEGORIES: Category[] = [
   { label: 'New Arrivals',  href: '/category/new-in',     icon: '✦' },
   { label: 'Men',           href: '/category/men',         icon: '👔' },
   { label: 'Women',         href: '/category/women',       icon: '👗' },
@@ -75,7 +86,7 @@ interface SearchOverlayProps {
 
 function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   const [query, setQuery]       = useState('');
-  const [results, setResults]   = useState<SearchResult[]>([]);
+  const [results, setResults]   = useState<Product[]>([]);
   const [loading, setLoading]   = useState(false);
   const [focused, setFocused]   = useState(-1);
   const inputRef                = useRef<HTMLInputElement>(null);
@@ -95,20 +106,23 @@ function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
   useEffect(() => {
     if (!debouncedQuery.trim()) { setResults([]); return; }
     setLoading(true);
+      const q = debouncedQuery.toLowerCase();
+
     // Replace with real API: api.searchProducts(debouncedQuery)
-    import('@/lib/api').then(({ api }) =>
-      api.getProducts().then(({ data }) => {
-        const q = debouncedQuery.toLowerCase();
-        const filtered = data.products.filter(
+   import('@/lib/api').then(({ api }) =>
+
+      api.productSearch(q).then(({ data}) => {
+        /*const filtered = data.products.filter(
           (p) =>
             p.name.toLowerCase().includes(q) ||
             p.shortDescription?.toLowerCase().includes(q) ||
             p.slug.toLowerCase().includes(q)
-        );
-        setResults(filtered as SearchResult[]);
+        );*/
+        setResults(data);
         setLoading(false);
       })
     );
+    
   }, [debouncedQuery]);
 
   // Close on Escape
@@ -342,7 +356,7 @@ function MobileSidebar({ isOpen, onClose }: SidebarProps) {
 // ═══════════════════════════════════════════════════
 // MAIN NAVBAR EXPORT
 // ═══════════════════════════════════════════════════
-export function Navbar({ cartCount = 0, wishlistCount = 0 }: NavbarProps) {
+export function Navbar({ cartCount = 0, wishlistCount = 0, navs =NAV_LINKS }: NavbarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
@@ -363,7 +377,7 @@ export function Navbar({ cartCount = 0, wishlistCount = 0 }: NavbarProps) {
         {/* Desktop nav */}
         <nav className="navbar__center">
           <ul className="navbar__nav">
-            {NAV_LINKS.map((item) => (
+            {navs.map((item) => (
               <li key={item.href}>
                 <a href={item.href}>{item.label}</a>
               </li>

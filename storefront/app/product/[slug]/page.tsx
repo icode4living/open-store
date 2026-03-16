@@ -75,7 +75,7 @@ export default function ProductDetailPage({ params }: { params: Params }) {
 
   const images = [
     product.mainImageURL,
-    ...product.galleryImages.map((g) => g.url),
+    ...product.galleryImages!.map((g) => g.url),
   ].filter(Boolean);
 
   if (images.length === 0) {
@@ -84,7 +84,7 @@ export default function ProductDetailPage({ params }: { params: Params }) {
 
   const price = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(product.salePrice);
   const cost  = new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(product.costPrice);
-  const hasDiscount = product.costPrice < product.salePrice!;
+  const hasDiscount = product.regularPrice! < product.salePrice!;
 
   return (
     <>

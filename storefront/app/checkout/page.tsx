@@ -110,7 +110,7 @@ useEffect(()=>{
                 <div>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, marginBottom: 'var(--space-xl)' }}>Delivery Information</h2>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-lg)' }}>
-                    <Input type="text" label="First Name" placeholder="Afolabi" value={info.firstName} onChange={(v) => setInfo({ ...info, firstName: v })} />
+                    <Input type="text" label="First Name" placeholder="Doe" value={info.firstName} onChange={(v) => setInfo({ ...info, firstName: v })} />
                     <Input type="text" label="Last Name" placeholder="Samuel" value={info.lastName} onChange={(v) => setInfo({ ...info, lastName: v })} />
                     <Input type="email" label="Email Address" placeholder="you@example.com" value={info.email} onChange={(v) => setInfo({ ...info, email: v })} />
                     <Input type="number" label="Phone Number" placeholder="0803..." value={info.phone} onChange={(v) => setInfo({ ...info, phone: v })} />

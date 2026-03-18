@@ -18,7 +18,7 @@ import { Store, StoreResponse } from '@/types/store';
 import { GET_STORE } from '@/graph/store';
 
 const restClient = new RestClient({
-  baseURL : process.env.NEXT_PUBLIC_BASE_URL || "",
+  baseURL : process.env.NEXT_PUBLIC_API_URL || "",
   headers: {
     'Content-Type': 'application/json',
   }

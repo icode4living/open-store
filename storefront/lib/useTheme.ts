@@ -2,7 +2,7 @@
 // Loads the full theme-config.json (colors + sections + footer + nav).
 // Applies CSS custom properties AND returns the full typed config so pages
 // can render banners, editorial grids, feature strips etc. dynamically.
-
+'use client'
 import { useState, useEffect } from 'react';
 import { api } from './api';
 import { Store } from '@/types/store';

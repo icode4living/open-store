@@ -91,9 +91,9 @@ useEffect(()=>{
                 <div>
                   <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.5rem', fontWeight: 400, marginBottom: 'var(--space-xl)' }}>Review Your Order</h2>
                   <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-md)' }}>
-                    {cartItem?.items.map((item) => (
-                      <div key={item.product.id} style={{ display: 'flex', gap: 'var(--space-lg)', background: 'white', borderRadius: 'var(--radius-lg)', padding: 'var(--space-md)', border: '1px solid var(--color-border)', alignItems: 'center' }}>
-                        <img src={item.product?.mainImageURL} alt={item.product.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
+                    {cartItem?.items!.map((item) => (
+                      <div key={item.product!.id} style={{ display: 'flex', gap: 'var(--space-lg)', background: 'white', borderRadius: 'var(--radius-lg)', padding: 'var(--space-md)', border: '1px solid var(--color-border)', alignItems: 'center' }}>
+                        <img src={item.product?.mainImageURL} alt={item.product!.name} style={{ width: 80, height: 80, objectFit: 'cover', borderRadius: 'var(--radius-md)' }} />
                         <div style={{ flex: 1 }}>
                           <p style={{ fontWeight: 600, marginBottom: '0.25rem' }}>{item.product.name}</p>
                           <p style={{ color: 'var(--color-text-muted)', fontSize: '0.8rem' }}>Qty: {item.quantity}</p>

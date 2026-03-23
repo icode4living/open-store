@@ -2,6 +2,7 @@
 'use client';
 import React, { useState } from 'react';
 import { Button, Input } from '@/components/ui';
+import { signIn } from 'next-auth/react';
 
 export function SignInPage() {
   const [email, setEmail]       = useState('');
@@ -14,7 +15,7 @@ export function SignInPage() {
     setLoading(true); setError('');
     await new Promise((r) => setTimeout(r, 1000));
     setLoading(false);
-    // signIn('credentials', { email, password, callbackUrl: '/' })
+    signIn('credentials', { email, password, callbackUrl: '/' })
   };
 
   const handleGoogle = () => {

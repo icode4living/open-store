@@ -12,6 +12,8 @@ import useTheme, {
   type ThemeCtaBtnConfig,
 } from '@/lib/useTheme';
 import { api } from '@/lib/api';
+import { Category } from '@/types/category';
+import Link from 'next/link';
 
 // ─── Shared section components ───────────────────────────────────────────────
 
@@ -96,17 +98,31 @@ export default function HomePage() {
   const [cartCount, setCartCount]   = useState(0);
   const [toast, setToast]           = useState<string | null>(null);
   const [email, setEmail]           = useState('');
-
+const [categories, setCategories] = useState<Category[]>([])
   useEffect(() => {
-    api.getProducts().then(({ data }) => {
-      setProducts(data.products as Product[]);
+    api.getProducts().then((data) => {
+    //  console.log(data)
+      setProducts(data as Product[]);
       setProdLoad(false);
     });
+    //get categories
+    api.getCategories().then((data)=>{
+      setCategories(data as Category[])
+    })
+
   }, []);
 
   const handleAddToCart = (product: Product) => {
+    api.addToCart(product.id,1 ).then((data)=>{
     setCartCount((c) => c + 1);
     showToast(`${product.name} added to cart`);
+
+    }).catch((err)=>{
+      console.error(err)
+          showToast(`Error adding item to cart`);
+
+    })
+    
   };
 
   const handleWishlist = (product: Product) => {
@@ -137,14 +153,15 @@ export default function HomePage() {
           <section className="section--sm">
             <div className="container">
               <div className="category-chips">
-                {s.categoryChips.categories.map((cat) => (
-                  <button
+                {categories.map((cat) => (
+                  <Link
                     key={cat.slug}
                     className={`category-chip${activeCategory === cat.slug ? ' category-chip--active' : ''}`}
                     onClick={() => setCategory(cat.slug)}
-                  >
-                    {cat.label}
-                  </button>
+                    href={`category/${cat.slug}`}
+                 >
+                    {cat.name}
+                  </Link>
                 ))}
               </div>
             </div>
@@ -177,6 +194,7 @@ export default function HomePage() {
                     <div key={product.id} className="animate-fade-up">
                       <ProductCard
                         product={product}
+                        currency={'NGN'}
                         onAddToCart={handleAddToCart}
                         onWishlistToggle={handleWishlist}
                         wishlisted={wishlist.has(product.id)}

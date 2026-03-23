@@ -1,10 +1,10 @@
 'use client';
 import React, { useEffect, useState } from 'react';
-import { ProductCard, Input, type Product } from '@/components/ui';
+import { ProductCard, Input} from '@/components/ui';
 import { api } from '@/lib/api';
 import { Navbar, MobileBottomNav } from '@/components/ui';
 import { useParams } from 'next/navigation'
-
+import { Product } from '@/types/product';
 const SORT_OPTIONS = [
   { label: 'Newest', value: 'newest' },
   { label: 'Price: Low–High', value: 'price-asc' },
@@ -21,14 +21,14 @@ export default function CategoryPage() {
   const [cartCount, setCartCount] = useState(0);
   const [wishlistCount] = useState(3);
 const params = useParams<{slug:string}>()
-  const categoryTitle =  params.slug.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
+  const categoryTitle =  params.slug//.replace(/-/g, ' ').replace(/\b\w/g, (c) => c.toUpperCase());
 
   useEffect(() => {
-    api.getProducts().then((data) => {
-      setProducts(data.data.products);
+    api.getProductByCategory(categoryTitle).then((data) => {
+      setProducts(data);
       setLoading(false);
     });
-  }, [params.slug]);
+  }, [categoryTitle]);
 
   const filtered = products
     .filter((p) => !search || p.name.toLowerCase().includes(search.toLowerCase()) || p.shortDescription?.toLowerCase().includes(search.toLowerCase()))
@@ -103,6 +103,7 @@ const params = useParams<{slug:string}>()
                 <a href={`/product/${product.slug}`} key={product.id} className="animate-fade-up" style={{ textDecoration: 'none' }}>
                   <ProductCard
                     product={product}
+                    currency='NGN'
                     onAddToCart={() => setCartCount((c) => c + 1)}
                     onWishlistToggle={(p) => setWishlist((prev) => { const n = new Set(prev); n.has(p.id) ? n.delete(p.id) : n.add(p.id); return n; })}
                     wishlisted={wishlist.has(product.id)}

@@ -3,6 +3,7 @@ import React, { useEffect, useState } from 'react';
 import { Button, Input } from '@/components/ui';
 import { type Product } from '@/types/product';
 import { api } from '@/lib/api';
+import { useParams } from 'next/navigation';
 
 // Safe HTML renderer — strips scripts, only allows safe tags
 function SafeHtml({ html }: { html: string }) {
@@ -19,12 +20,12 @@ function SafeHtml({ html }: { html: string }) {
   );
 }
 
-interface Params { slug: string }
+//interface Params { slug: string }
 
-export default function ProductDetailPage({ params }: { params: Params }) {
+export default function ProductDetailPage() {
   const [product, setProduct]     = useState<Product | null>(null);
   const [loading, setLoading]     = useState(true);
-  const [quantity, setQuantity]   = useState('1');
+  const [quantity, setQuantity]   = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [wishlisted, setWishlisted] = useState(false);
   const [addingCart, setAddingCart] = useState(false);
@@ -32,13 +33,14 @@ export default function ProductDetailPage({ params }: { params: Params }) {
   const [selectedSize, setSize]   = useState<string | null>(null);
 
   const SIZES = ['XS', 'S', 'M', 'L', 'XL'];
-
+const params = useParams<{slug:string}>()
+const slug = params.slug
   useEffect(() => {
-    api.getProductBySlug(params.slug).then((p) => {
+    api.getProductBySlug(slug).then((p) => {
       setProduct(p);
       setLoading(false);
     });
-  }, [params.slug]);
+  }, [slug]);
 
   const handleAddToCart = async () => {
     if (!product) return;

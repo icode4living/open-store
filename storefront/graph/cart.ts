@@ -20,7 +20,6 @@ quantity:  $quantity
 `;
 
 export const GET_CART = gql `
-
     query Mycart{
         myCart{
             id
@@ -31,6 +30,8 @@ export const GET_CART = gql `
             product{
             id
             name
+            regularPrice
+            salePrice
             mainImageURL
             }
                 
@@ -50,6 +51,52 @@ mutation UpdateCartItem($itemID: ID!, $quantity: Int!){
         items{
             productID
             quantity
+            product{
+            id
+            name
+            regularPrice
+            salePrice
+            mainImageURL
+            }
+    }
+        }
+}
+`;
+
+export const CLEAR_CART = gql `
+mutation ClearCart{
+    clearCart{
+        id
+        storeID
+        items{
+            productID
+            quantity
+            product{
+            id
+            name
+            regularPrice
+            salePrice
+            mainImageURL
+            }
+    }
+        }
+}
+`;
+export const REMOVE_CART_ITEM = gql `
+mutation RemoveFromCart($itemID: ID!){
+    removeFromCart(itemID:$itemID){
+id
+        storeID
+        items{
+            productID
+            quantity
+            product{
+            id
+            name
+            regularPrice
+            salePrice
+            mainImageURL
+            }
     }
     }
 }

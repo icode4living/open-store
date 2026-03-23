@@ -6,7 +6,7 @@ export interface Store{
     theme:unknown;
 }
 export interface StoreResponse{
-    data:{
+    
         stores:Store[]
-    }
+
 }

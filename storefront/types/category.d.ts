@@ -10,9 +10,10 @@ export interface CategoryConnection{
 }
 
 export interface CategoryResponse{
-  data:{
-    categories: Array<{
+  
+    categories: {
+      edges: Array<{
       node: Category;
     }>;
-  };
-}
+    }
+  }

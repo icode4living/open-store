@@ -111,7 +111,7 @@ function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
     // Replace with real API: api.searchProducts(debouncedQuery)
    import('@/lib/api').then(({ api }) =>
 
-      api.productSearch(q).then(({ data}) => {
+      api.productSearch(q).then(( data) => {
         /*const filtered = data.products.filter(
           (p) =>
             p.name.toLowerCase().includes(q) ||
@@ -401,7 +401,7 @@ export function Navbar({ cartCount = 0, wishlistCount = 0, navs =NAV_LINKS }: Na
             {iconHeart()}
             {wishlistCount > 0 && <span className="navbar__cart-count">{wishlistCount}</span>}
           </a>
-          <a href="/checkout" className="navbar__icon-btn" aria-label="Cart">
+          <a href="/cart" className="navbar__icon-btn" aria-label="Cart">
             {iconCart()}
             {cartCount > 0 && <span className="navbar__cart-count">{cartCount}</span>}
           </a>

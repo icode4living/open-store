@@ -26,30 +26,27 @@ export interface ProductConnection {
 }
 
 export interface ProductsResponse {
-  data: {
+  
     products: { 
       edges: Array<{
         node: Product;
       }>;
-    };
+  
   };
 }
 
 export interface ProductsByCategoryResponse{
-  data: {
+  
     productByCategory: { 
       edges: Array<{
         node: Product;
       }>;
-    };
+    
   };
 }
 
-export interface ProductBySlug{
-  productBySlug:Product
-}
 export interface ProductBySlugResponse{
-  data:ProductBySlug
+  productBySlug:Product
 }
 
 export interface ProductSearchResponse{

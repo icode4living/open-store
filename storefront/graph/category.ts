@@ -10,6 +10,7 @@ query ProductByCategory($slug: String!){
         name
          stockQuantity
         stockStatus
+        slug
         shortDescription
         regularPrice
         salePrice  

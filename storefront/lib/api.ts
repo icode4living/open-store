@@ -8,14 +8,16 @@ import { ProductBySlugResponse, ProductConnection,
     type Product  } from '@/types/product';
 import { CustomerOrders, GetOrderItem, GetOrderResponse, Order } from '@/types/order';
 // Cart 
-import { Cart, AddToCartResponse, GetCartResponse, UpdateCartResponse } from '@/types/cart';
-import { GET_CART, UPDATE_CART, ADD_TO_CART } from '@/graph/cart';
+import { Cart, AddToCartResponse, GetCartResponse, UpdateCartResponse, RemoveFromCartResponse, ClearCartResponse } from '@/types/cart';
+import { GET_CART, UPDATE_CART, ADD_TO_CART, REMOVE_CART_ITEM, CLEAR_CART } from '@/graph/cart';
 // libraries
 import { createApolloClient } from './appolloClient';
 import { RestClient } from './restClient';
 import { GET_ODERS } from '@/graph/order';
 import { Store, StoreResponse } from '@/types/store';
 import { GET_STORE } from '@/graph/store';
+import { Category, CategoryResponse } from '@/types/category';
+import { Console } from 'console';
 
 const restClient = new RestClient({
   baseURL : process.env.NEXT_PUBLIC_API_URL || "",
@@ -41,11 +43,33 @@ async getProducts(): Promise<Product[]> {
     });
 
     if (gqlError) return new Error(gqlError.message);
-
+//console.log(data?.products)
     // Extract the nodes from the edges array
-    const products = data?.data?.products?.edges?.map(edge => edge.node) || [];
+    const products = data?.products?.edges?.map(edge => edge.node) || [];
 
     return products;
+  } catch (e) {
+    // Standardizing error handling
+    throw new Error(e instanceof Error ? e.message : String(e));
+  }
+},
+// list categories
+
+async getCategories(): Promise<Category[]> {
+  try {
+    const client = createApolloClient();
+    
+    const { data, error: gqlError } = await client.query<CategoryResponse>({
+      query: GET_CATEGORIES,
+      fetchPolicy: 'network-only',
+    });
+
+    if (gqlError) return new Error(gqlError.message);
+//console.log(data?.products)
+    // Extract the nodes from the edges array
+    const categories = data?.categories.edges.map(edge => edge.node) || [];
+
+    return categories;
   } catch (e) {
     // Standardizing error handling
     throw new Error(e instanceof Error ? e.message : String(e));
@@ -64,7 +88,7 @@ async getStore(): Promise<Store> {
     if (gqlError) return new Error(gqlError.message);
 
     // Extract the nodes from the edges array
-    const store = data?.data?.stores[0]
+    const store = data?.stores[0]
 
     return store;
   } catch (e) {
@@ -85,8 +109,9 @@ async getStore(): Promise<Store> {
       variables:{slug:slug},
       fetchPolicy: 'network-only',
     });
+  //  console.log("product data", data)
         if (gqlError) return new Error(gqlError.message);
-const product = data?.data?.productBySlug
+const product = data?.productBySlug
 return product
     }
     catch(e){
@@ -121,7 +146,7 @@ const { data, error: gqlError } = await client.query<ProductSearchResponse>({
    * @param slug 
    * @returns @interface Product
    */
-async getProductByCategory(slug:string): Promise<Product[] | Error> {
+async getProductByCategory(slug:string): Promise<Product[]> {
   try {
     const client = createApolloClient();
     
@@ -130,11 +155,11 @@ async getProductByCategory(slug:string): Promise<Product[] | Error> {
       variables:{slug:slug},
       fetchPolicy: 'network-only',
     });
-
+    console.log("Category:", data )
     if (gqlError) return new Error(gqlError.message);
 
     // Extract the nodes from the edges array
-    const products = data?.data?.productByCategory?.edges?.map(edge => edge.node) || [];
+    const products = data?.productByCategory?.edges?.map(edge => edge.node) || [];
 
     return products;
   } catch (e) {
@@ -156,6 +181,7 @@ const { data, error: gqlError } = await client.mutate<AddToCartResponse>({
   mutation: ADD_TO_CART,
   variables:{productID:productID, quantity:quantity}
 });
+//console.log("data",data)
     if (gqlError) return new Error(gqlError.message);
     const cart = data?.data?.addToCart
     return cart
@@ -175,10 +201,12 @@ const { data, error: gqlError } = await client.query<GetCartResponse>({
       query: GET_CART,
       fetchPolicy: 'network-only',
     });
+    console.log("data:", data)
         if (gqlError) return new Error(gqlError.message);
-    const cart = data?.data?.myCart
+    const cart = data?.myCart
 return cart
    }catch(e){
+    console.error(e)
           throw new Error(e instanceof Error ? e.message : String(e));
 
    }
@@ -199,7 +227,7 @@ const { data, error: gqlError } = await client.mutate<UpdateCartResponse>({
   variables:{itemID:itemID, quantity:quantity}
 });
     if (gqlError) return new Error(gqlError.message);
-    const cart = data?.data?.updateCartItem
+    const cart = data?.updateCartItem
     return cart
      }catch(e){
           throw new Error(e instanceof Error ? e.message : String(e));
@@ -207,7 +235,46 @@ const { data, error: gqlError } = await client.mutate<UpdateCartResponse>({
      }
   
   },
+  /**
+   * 
+   * @param itemID 
+   * @returns @interface Cart
+   */
+  async removeFromCart(itemID: string): Promise<Cart> {
+    try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.mutate<RemoveFromCartResponse>({
+  mutation: REMOVE_CART_ITEM,
+  variables:{itemID:itemID}
+});
+    if (gqlError) return new Error(gqlError.message);
+    const cart = data?.removeFromCart
+    return cart
+     }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
 
+     }
+  
+  },
+  /**
+   * 
+   * @returns @interface Cart
+   */
+  async clearCart(): Promise<Cart> {
+    try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.mutate<ClearCartResponse>({
+  mutation: CLEAR_CART,
+});
+    if (gqlError) return new Error(gqlError.message);
+    const cart = data?.clearCart
+    return cart
+     }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+     }
+  
+  },
   /* ── Customer ── */
   /**
    * 
@@ -244,6 +311,21 @@ const result = await restClient.post<Customer>('/customers/register',{
 });
 return result
    }catch(e){
+    console.error("Customer error: ", e)
+    throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
+  },
+  async login (email: string, password: string): Promise<Customer> {
+   try{
+const result = await restClient.post<Customer>('/customers/login',{
+  data:{
+    email,
+    password
+  }
+});
+return result
+   }catch(e){
     
     throw new Error(e instanceof Error ? e.message : String(e));
 
@@ -264,19 +346,21 @@ const { data, error: gqlError } = await client.mutate<CreateAddressResponse>({
   variables:{input:{
     firstName: address.firstName,
     lastName: address.lastName,
+    //email: address.email,
     addressLine1: address.addressLine1,
     ...(address.addressLine2 !=null &&{ addressLine2: address.addressLine2}),
     city: address.city,
-    postalCode: address.postal,
+    postalCode: address.postalCode,
     country: address.country,
     customerID: address.customerID
 
   }}
 });
     if (gqlError) return new Error(gqlError.message);
-    const resp = data?.data?.createAddress
+    const resp = data?.createAddress
     return resp
      }catch(e){
+      console.error(e)
           throw new Error(e instanceof Error ? e.message : String(e));
 
      }
@@ -297,7 +381,7 @@ const { data, error: gqlError } = await client.query<GetAddressResponse>({
       fetchPolicy: 'network-only',
     });
         if (gqlError) return new Error(gqlError.message);
-    const resp = data?.data?.customerAddresses
+    const resp = data?.customerAddresses
     return resp
 
    }catch(e){
@@ -313,16 +397,22 @@ const { data, error: gqlError } = await client.query<GetAddressResponse>({
    * @returns @interface Order
    */
 async checkout (email: string, paymentMethod: string): Promise<Order | undefined> {
-   try{
+    console.log("resp: ",{
+      email,
+      paymentMethod
+    })
+
+  try{
 const result = await restClient.post<Order>('/orders/checkout',{
   data:{
-    email,
-    paymentMethod
+   "customer_email": email,
+    "payment_method": paymentMethod
   }
 });
+
 return result
    }catch(e){
-    
+    console.error("Checkout Error: ", e?.message)
     throw new Error(e instanceof Error ? e.message : String(e));
 
    }

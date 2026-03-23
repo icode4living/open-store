@@ -1,0 +1,14 @@
+myapp.local {
+    # Important: explicitly preserve the client's original Host
+    reverse_proxy localhost:3040 {
+        header_up Host {http.request.host}
+    }
+
+    # Optional but helpful for debugging
+    log {
+        output stderr
+        format console
+    }
+}
+
+# Run -> sudo caddy run --config ./Caddyfile

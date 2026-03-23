@@ -29,6 +29,8 @@ query ProductBySlug($slug:String!){
         description
         regularPrice
         salePrice
+        mainImageURL
+
         galleryImages{
             url
             productID

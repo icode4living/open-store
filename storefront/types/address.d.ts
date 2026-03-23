@@ -11,21 +11,24 @@ export interface Address{
 export interface AddressInput{
     firstName:string, 
     lastName: string, 
+    email:string,
+    phone: string;
     addressLine1:string,
     addressLine2?: string,
     city: string, 
-    postal:string, 
+    state: string,
+    postalCode:string, 
     country:string, 
     customerID:string
 
 }
 export interface GetAddressResponse{
-    data:{
+   
         customerAddresses:Address[]
-    }
+    
 }
 export interface CreateAddressResponse{
-    data:{
+    
         createAddress: Address
-    }
+
 }

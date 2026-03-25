@@ -13,7 +13,9 @@ import useTheme, {
 } from '@/lib/useTheme';
 import { api } from '@/lib/api';
 import { Category } from '@/types/category';
+
 import Link from 'next/link';
+import { useSession } from 'next-auth/react';
 
 // ─── Shared section components ───────────────────────────────────────────────
 
@@ -99,6 +101,8 @@ export default function HomePage() {
   const [toast, setToast]           = useState<string | null>(null);
   const [email, setEmail]           = useState('');
 const [categories, setCategories] = useState<Category[]>([])
+  const { data: session } = useSession();
+
   useEffect(() => {
     api.getProducts().then((data) => {
     //  console.log(data)
@@ -118,19 +122,23 @@ const [categories, setCategories] = useState<Category[]>([])
     showToast(`${product.name} added to cart`);
 
     }).catch((err)=>{
-      console.error(err)
+      //console.error(err)
           showToast(`Error adding item to cart`);
 
     })
     
   };
 
-  const handleWishlist = (product: Product) => {
-    setWishlist((prev) => {
+  const handleWishlist = (id:string) => {
+    /*setWishlist((prev) => {
       const next = new Set(prev);
       next.has(product.id) ? next.delete(product.id) : next.add(product.id);
       return next;
-    });
+    });*/
+    if (!session?.user?.id) return  showToast(`Login to create wishlist...`);
+    api.addToWishList(id).then(()=>{
+      showToast("Item added to cart")
+    })
   };
 
   const showToast = (msg: string) => {
@@ -196,7 +204,7 @@ const [categories, setCategories] = useState<Category[]>([])
                         product={product}
                         currency={'NGN'}
                         onAddToCart={handleAddToCart}
-                        onWishlistToggle={handleWishlist}
+                        onWishlistToggle={()=>handleWishlist(product.id)}
                         wishlisted={wishlist.has(product.id)}
                       />
                     </div>

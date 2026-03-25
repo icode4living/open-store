@@ -2,29 +2,35 @@
 'use client';
 import React, { useState, useEffect } from 'react';
 import { Navbar, MobileBottomNav } from '@/components/ui';
-import { ProductCard, type Product } from '@/components/ui';
+import { ProductCard } from '@/components/ui';
+import { Product } from '@/types/product';
 import { Button } from '@/components/ui';
 import { api } from '@/lib/api';
+import { Wishlist } from '@/types/wislist';
+import { useSession } from 'next-auth/react';
 
 export default function WishlistPage() {
-  const [allProducts, setAllProducts] = useState<Product[]>([]);
-  const [wishlist, setWishlist]       = useState<Set<string>>(new Set());
+  const [product, setAllProducts] = useState<Product[]>([]);
+  const [wishlist, setWishlist]       = useState<Wishlist>();
   const [cartCount, setCartCount]     = useState(0);
   const [loading, setLoading]         = useState(true);
   const [toast, setToast]             = useState<string | null>(null);
 
   useEffect(() => {
-    api.getProducts().then(({ data }) => {
-      setAllProducts(data.products as Product[]);
+    api.getWishlist().then((data) => {
+      setWishlist(data);
       // In a real app: load wishlist IDs from localStorage / API
       // For demo, pre-populate with first 3 items
-      setWishlist(new Set(data.products.slice(0, 3).map((p) => p.id)));
+     // setWishlist(new Set(data.products.slice(0, 3).map((p) => p.id)));
       setLoading(false);
     });
+    api.getProducts().then((data)=>{
+      setAllProducts(product)
+    })
   }, []);
 
-  const wishlisted = allProducts.filter((p) => wishlist.has(p.id));
-
+  //const wishlist.items.= wishlist.filter((p) => wishlist.has(p.id));
+/*
   const handleRemove = (product: Product) => {
     setWishlist((prev) => {
       const next = new Set(prev);
@@ -33,16 +39,27 @@ export default function WishlistPage() {
     });
     showToast(`${product.name} removed from wishlist`);
   };
-
-  const handleAddToCart = (product: Product) => {
-    setCartCount((c) => c + 1);
-    showToast(`${product.name} added to cart`);
-  };
-
+  
   const handleMoveAllToCart = () => {
-    setCartCount((c) => c + wishlisted.length);
-    showToast(`${wishlisted.length} items added to cart`);
+    setCartCount((c) => c + wishlist.items.length);
+    showToast(`${wishlist.items.length} items added to cart`);
   };
+  
+  */
+
+   const handleAddToCart = (product: Product) => {
+      api.addToCart(product.id,1 ).then((data)=>{
+      setCartCount((c) => c + 1);
+      showToast(`${product.name} added to cart`);
+  
+      }).catch((err)=>{
+        //console.error(err)
+            showToast(`Error adding item to cart`);
+  
+      })
+      
+    };
+
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -51,7 +68,7 @@ export default function WishlistPage() {
 
   return (
     <>
-      <Navbar cartCount={cartCount} wishlistCount={wishlist.size} />
+      <Navbar cartCount={cartCount} wishlistCount={wishlist?.items.length} />
 
       <main style={{ background: 'var(--color-surface)', minHeight: '100vh' }}>
         {/* Page header */}
@@ -68,10 +85,10 @@ export default function WishlistPage() {
                   My Wishlist
                 </h1>
                 <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: 'var(--space-sm)', fontSize: '0.85rem' }}>
-                  {loading ? '—' : `${wishlisted.length} saved item${wishlisted.length !== 1 ? 's' : ''}`}
+                  {loading ? '—' : `${wishlist?.items.length} saved item${wishlist?.items.length !== 1 ? 's' : ''}`}
                 </p>
               </div>
-              {wishlisted.length > 0 && !loading && (
+              {/*wishlist.items.length > 0 && !loading && (
                 <Button
                   title="Move All to Cart"
                   action={handleMoveAllToCart}
@@ -79,7 +96,7 @@ export default function WishlistPage() {
                   size="sm"
                   classes=""
                 />
-              )}
+              )*/}
             </div>
           </div>
         </div>
@@ -91,7 +108,7 @@ export default function WishlistPage() {
                 <div key={i} style={{ aspectRatio: '3/4' }} className="skeleton" />
               ))}
             </div>
-          ) : wishlisted.length === 0 ? (
+          ) : wishlist?.items.length === 0 ? (
             /* Empty state */
             <div className="wishlist-empty animate-fade-up">
               <div className="wishlist-empty__icon">
@@ -133,13 +150,14 @@ export default function WishlistPage() {
               </div>
 
               <div className="product-grid stagger">
-                {wishlisted.map((product) => (
-                  <div key={product.id} className="animate-fade-up">
+                {wishlist?.items.map((item) => (
+                  <div key={item.id} className="animate-fade-up">
                     <ProductCard
-                      product={product}
+                      product={item.product}
                       onAddToCart={handleAddToCart}
-                      onWishlistToggle={handleRemove}
+                      onWishlistToggle={()=>/*handleRemove*/null}
                       wishlisted={true}
+                      currency={}
                     />
                   </div>
                 ))}
@@ -152,23 +170,21 @@ export default function WishlistPage() {
                   <h2 className="section-header__title">You Might Also Like</h2>
                 </div>
                 <div className="product-grid stagger">
-                  {allProducts
-                    .filter((p) => !wishlist.has(p.id))
+                  {wishlist?.items.map
+                    ((p) => product.find(e=> e.id !==p.product.id))
                     .slice(0, 4)
-                    .map((product) => (
-                      <div key={product.id} className="animate-fade-up">
+                    .map((products) => (
+                      <div key={products?.id} className="animate-fade-up">
                         <ProductCard
-                          product={product}
+                          product={products}
                           onAddToCart={handleAddToCart}
                           onWishlistToggle={(p) => {
-                            setWishlist((prev) => {
-                              const next = new Set(prev);
-                              next.add(p.id);
-                              return next;
-                            });
+                           
+                              api.addToWishList(p.id).then(()=>{
                             showToast(`${p.name} added to wishlist`);
+                              })
                           }}
-                          wishlisted={false}
+                          wishlistlisted={false}
                         />
                       </div>
                     ))}

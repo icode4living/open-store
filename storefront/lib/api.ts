@@ -6,18 +6,20 @@ import { Address, AddressInput, CreateAddressResponse, GetAddressResponse } from
 import { ProductBySlugResponse, ProductConnection,
    ProductsByCategoryResponse, ProductSearchResponse, ProductsResponse,
     type Product  } from '@/types/product';
-import { CustomerOrders, GetOrderItem, GetOrderResponse, Order } from '@/types/order';
+import { CustomerOrders, GetOrderItem, GetOrderResponse, MyOrderResponse, Order, OrderDetail } from '@/types/order';
 // Cart 
 import { Cart, AddToCartResponse, GetCartResponse, UpdateCartResponse, RemoveFromCartResponse, ClearCartResponse } from '@/types/cart';
 import { GET_CART, UPDATE_CART, ADD_TO_CART, REMOVE_CART_ITEM, CLEAR_CART } from '@/graph/cart';
 // libraries
 import { createApolloClient } from './appolloClient';
 import { RestClient } from './restClient';
-import { GET_ODERS } from '@/graph/order';
+import { GET_ODERS, ORDER_DETAIL } from '@/graph/order';
 import { Store, StoreResponse } from '@/types/store';
 import { GET_STORE } from '@/graph/store';
 import { Category, CategoryResponse } from '@/types/category';
 import { Console } from 'console';
+import { AddToWishlist, MyWishlist, Wishlist } from '@/types/wislist';
+import { CREATE_WISHLIST, GET_WISHLIST } from '@/graph/wishlist';
 
 const restClient = new RestClient({
   baseURL : process.env.NEXT_PUBLIC_API_URL || "",
@@ -389,6 +391,50 @@ const { data, error: gqlError } = await client.query<GetAddressResponse>({
 
    }
   },
+  /* Wishlist */
+/**Add to wishlist
+ * 
+ * @param productId 
+ * @returns @type string
+ */
+    async addToWishList(productId:string): Promise<String> {
+    try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.mutate<AddToWishlist>({
+  mutation: CREATE_WISHLIST,
+  variables:{productID:productId}
+});
+    if (gqlError) return new Error(gqlError.message);
+    const id = data?.addToWishlist.id
+    return id
+     }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+     }
+  
+  },
+  /**
+   * Get Wishlist
+   * 
+   * @returns @interface MyWishlist
+   */
+ async getWishlist(): Promise<Wishlist> {
+   try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.query<MyWishlist>({
+      query: GET_WISHLIST,
+      fetchPolicy: 'network-only',
+    });
+        if (gqlError) return new Error(gqlError.message);
+    const resp = data?.myWishlist
+    return resp
+
+   }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
+  },
+
   /* Checkout & Orders */
   /**
    * 
@@ -419,7 +465,11 @@ return result
   },
 
 //order
-
+/**
+ * 
+ * @param customerID 
+ * @returns @interface CustomerOrder[]
+ */
     async getOrders(customerID:string): Promise<CustomerOrders[] > {
    try{
     const client = createApolloClient();
@@ -429,7 +479,7 @@ const { data, error: gqlError } = await client.query<GetOrderResponse>({
       fetchPolicy: 'network-only',
     });
         if (gqlError) return new Error(gqlError.message);
-    const resp = data?.data?.customerOrders
+    const resp = data?.customerOrders
     return resp
 
    }catch(e){
@@ -437,5 +487,28 @@ const { data, error: gqlError } = await client.query<GetOrderResponse>({
 
    }
   },
+  /**
+   * Get order detail
+   * @param orderId 
+   * @returns @interface MyOrder
+   */
+async orDetail(orderId:string): Promise<CustomerOrders> {
+   try{
+    const client = createApolloClient();
+const { data, error: gqlError } = await client.query<MyOrderResponse>({
+      query: ORDER_DETAIL,
+      variables:{id:orderId},
+      fetchPolicy: 'network-only',
+    });
+        if (gqlError) return new Error(gqlError.message);
+    const resp = data?.myOrder
+    return resp
+
+   }catch(e){
+          throw new Error(e instanceof Error ? e.message : String(e));
+
+   }
+  },
+
 }
 

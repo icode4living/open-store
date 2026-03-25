@@ -7,6 +7,7 @@ query CustomerOrders($customerID: ID){
 id
 status
 total
+createdAt
 items{
   id
   productImage
@@ -16,4 +17,22 @@ items{
 }
   }
 }
+`
+export const ORDER_DETAIL = gql `
+query MyOrder($id:ID!){
+    myOrder(id:$id){
+        id
+status
+total
+ublInvoiceID
+items{
+  id
+  productImage
+  qty
+  subtotal
+  productName
+}
+    }
+}
+
 `

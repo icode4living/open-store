@@ -39,12 +39,15 @@ export interface CustomerOrders{
   id:string;
   status:OrderStatus
   total:number;
+  createdAt:string;
   ublinvoiceID:string;// use has order number
   items:GetOrderItem[]
 }
 
-export interface GetOrderResponse{
-  data:{
-    customerOrders:CustomerOrders[]
-  }
+
+
+export interface MyOrderResponse{
+
+    myOrder:CustomerOrders
+  
 }

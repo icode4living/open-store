@@ -3,7 +3,6 @@ import axios, { AxiosInstance, AxiosRequestConfig, AxiosResponse } from 'axios';
 interface HttpClientConfig extends AxiosRequestConfig {
   baseURL: string;
   headers?: Record<string, string>;
-  // Explicitly allowing withCredentials to be passed, though it's in AxiosRequestConfig
 }
 
 export class RestClient {
@@ -11,9 +10,13 @@ export class RestClient {
 
   constructor(config: HttpClientConfig) {
     this.client = axios.create({
-      timeout: 10000, 
-      withCredentials: true, // Key change: Enables sending/receiving cookies
+      timeout: 10000,
+      withCredentials: true,
       ...config,
+      headers: {
+     
+        ...config.headers,
+      },
     });
 
     this.initializeInterceptors();
@@ -24,20 +27,17 @@ export class RestClient {
       (response) => response,
       (error) => {
         const message = error.response?.data?.message || error.message;
+        console.log("[REST DEBUG]: ", error);
         return Promise.reject(new Error(message));
       }
     );
   }
 
-  /**
-   * Generic Request Handler
-   */
   public async request<T>(config: AxiosRequestConfig): Promise<T> {
     const response: AxiosResponse<T> = await this.client.request(config);
     return response.data;
   }
 
-  // Convenience methods
   public async get<T>(url: string, config?: AxiosRequestConfig): Promise<T> {
     return this.request<T>({ method: 'GET', url, ...config });
   }

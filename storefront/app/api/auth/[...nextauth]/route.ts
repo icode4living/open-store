@@ -21,7 +21,7 @@ import { Customer } from "@/types/customer";
             try {
            // const apolloClient = createApolloClient();
             const result  = await api.login(credentials.email, credentials.password)
-
+              console.log("login: ", result)
           
           if (!result?.id) return null;
 
@@ -73,7 +73,8 @@ import { Customer } from "@/types/customer";
   },
 
   pages: {
-    signIn: "/login",
+    signIn: "/auth/login",
+    error: '/auth/error'
   },
 
   secret: process.env.NEXTAUTH_SECRET,

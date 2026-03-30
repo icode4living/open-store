@@ -25,7 +25,8 @@ if(session?.user?.id) return
   api.getOrders(session?.user?.id).then((data)=>{
     setOrders(data)
   })
-},[session?.user?.id])
+  console.log("session:", session?.user.id)
+},[])
   return (
     <ProfileLayout active="My Orders">
       <h2 style={{ fontFamily: 'var(--font-display)', fontSize: '1.75rem', fontWeight: 400, marginBottom: 'var(--space-xl)' }}>My Orders</h2>

@@ -6,7 +6,7 @@ import { Address, AddressInput, CreateAddressResponse, GetAddressResponse } from
 import { ProductBySlugResponse, ProductConnection,
    ProductsByCategoryResponse, ProductSearchResponse, ProductsResponse,
     type Product  } from '@/types/product';
-import { CustomerOrders, GetOrderItem, GetOrderResponse, MyOrderResponse, Order, OrderDetail } from '@/types/order';
+import { CustomerOrders, GetOrderItem, MyOrderResponse, Order } from '@/types/order';
 // Cart 
 import { Cart, AddToCartResponse, GetCartResponse, UpdateCartResponse, RemoveFromCartResponse, ClearCartResponse } from '@/types/cart';
 import { GET_CART, UPDATE_CART, ADD_TO_CART, REMOVE_CART_ITEM, CLEAR_CART } from '@/graph/cart';
@@ -21,13 +21,15 @@ import { Console } from 'console';
 import { AddToWishlist, MyWishlist, Wishlist } from '@/types/wislist';
 import { CREATE_WISHLIST, GET_WISHLIST } from '@/graph/wishlist';
 
-const restClient = new RestClient({
-  baseURL : process.env.NEXT_PUBLIC_API_URL || "",
-  headers: {
-    'Content-Type': 'application/json',
-  }
+export const restClient =  new RestClient({
+  baseURL : "/api",
+ 
 })
 
+export const serverClient =  new RestClient({
+  baseURL : process.env.NEXT_PUBLIC_API_URL || "",
+ 
+})
 
 export const api = {
  /* ── Products ── */
@@ -183,7 +185,7 @@ const { data, error: gqlError } = await client.mutate<AddToCartResponse>({
   mutation: ADD_TO_CART,
   variables:{productID:productID, quantity:quantity}
 });
-//console.log("data",data)
+//console.log("cart",data)
     if (gqlError) return new Error(gqlError.message);
     const cart = data?.data?.addToCart
     return cart
@@ -305,7 +307,7 @@ return result
  */
   async registerCustomer (email: string, password: string): Promise<Customer | undefined> {
    try{
-const result = await restClient.post<Customer>('/customers/register',{
+const result = await restClient.post<Customer>('/register-customer',{
   data:{
     email,
     password
@@ -320,18 +322,28 @@ return result
   },
   async login (email: string, password: string): Promise<Customer> {
    try{
-const result = await restClient.post<Customer>('/customers/login',{
+    console.log(`EMAIL: ${email} \n PASSWORD: ${password}`)
+const result = await serverClient.post<Customer>('/customers/login',{
   data:{
-    email,
-    password
+
+    "email":email,
+    "password":password
   }
+  
 });
+
+
+ console.error("[LOGIN BUG]: ", result)
+if (!result){
+  console.error("[LOGIN BUG]: ", result)
+}
 return result
    }catch(e){
-    
-    throw new Error(e instanceof Error ? e.message : String(e));
+    console.log("Error: ",e)
+   throw new Error(e instanceof Error ? e.message : String(e));
 
    }
+   
   },
 
 /** Address */
@@ -449,7 +461,7 @@ async checkout (email: string, paymentMethod: string): Promise<Order | undefined
     })
 
   try{
-const result = await restClient.post<Order>('/orders/checkout',{
+const result = await restClient.post<Order>('/checkout',{
   data:{
    "customer_email": email,
     "payment_method": paymentMethod

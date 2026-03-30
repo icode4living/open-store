@@ -42,7 +42,7 @@ const SIDEBAR_EXTRAS = [
   { label: 'Wishlist',     href: '/wishlist',          icon: iconHeart() },
   { label: 'My Orders',    href: '/profile/orders',    icon: iconBox() },
   { label: 'Blog',         href: '/blog',              icon: iconArticle() },
-  { label: 'Sign In',      href: '/auth/signin',       icon: iconLock() },
+  { label: 'Sign In',      href: '/auth/login',       icon: iconLock() },
 ];
 
 // ─── SVG icon helpers ───────────────────────────
@@ -304,7 +304,7 @@ function MobileSidebar({ isOpen, onClose }: SidebarProps) {
           <div className="sidebar-drawer__avatar">A</div>
           <div>
             <p className="sidebar-drawer__user-name">Afolabi Samuel</p>
-            <a href="/auth/signin" className="sidebar-drawer__user-link" onClick={onClose}>Sign in / Register →</a>
+            <a href="/auth/login" className="sidebar-drawer__user-link" onClick={onClose}>Sign in / Register →</a>
           </div>
         </div>
 
@@ -394,7 +394,7 @@ export function Navbar({ cartCount = 0, wishlistCount = 0, navs =NAV_LINKS }: Na
           >
             {iconSearch()}
           </button>
-          <a href="/auth/signin" className="navbar__icon-btn hide-mobile" aria-label="Account">
+          <a href="/auth/login" className="navbar__icon-btn hide-mobile" aria-label="Account">
             {iconProfile()}
           </a>
           <a href="/wishlist" className="navbar__icon-btn hide-mobile" aria-label="Wishlist">

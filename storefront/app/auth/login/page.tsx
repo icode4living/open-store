@@ -3,19 +3,25 @@
 import React, { useState } from 'react';
 import { Button, Input } from '@/components/ui';
 import { signIn } from 'next-auth/react';
+import useTheme from '@/lib/useTheme';
 
 export function SignInPage() {
   const [email, setEmail]       = useState('');
   const [password, setPassword] = useState('');
   const [loading, setLoading]   = useState(false);
   const [error, setError]       = useState('');
+  const { config, loading: themeLoading, store } = useTheme();
 
   const handleSignIn = async () => {
     if (!email || !password) { setError('Please fill in all fields.'); return; }
     setLoading(true); setError('');
-    await new Promise((r) => setTimeout(r, 1000));
+   // await new Promise((r) => setTimeout(r, 1000));
     setLoading(false);
-    signIn('credentials', { email, password, callbackUrl: '/' })
+    signIn('credentials', { email, password, redirect: false}).then(()=>{
+      //window.location.replace("/")
+    }).catch((e)=>{
+      setError('Invalid email or password')
+      console.error("login error: ", e)})
   };
 
   const handleGoogle = () => {
@@ -26,7 +32,7 @@ export function SignInPage() {
   return (
     <div className="auth-page">
       <div className="auth-card animate-scale-in">
-        <a href="/" className="auth-logo">Maison</a>
+        <a href="/" className="auth-logo">{store?.name}</a>
         <h1 className="auth-title">Welcome back</h1>
         <p className="auth-subtitle">Sign in to your account to continue shopping</p>
 

@@ -6,7 +6,7 @@ import {
 } from "@apollo/client";
 
 const httpLink = new HttpLink({
-  uri: `${process.env.NEXT_PUBLIC_API_URL}/graphql`,
+  uri: `/api/graphql`,
   credentials: "include", // sends cookies with every request
   fetch,
 });

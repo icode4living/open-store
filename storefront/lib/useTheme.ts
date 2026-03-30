@@ -330,7 +330,7 @@ function setCache(config: Store) {
 async function fetchRemoteConfig(): Promise<Store | null> {
   try {
     const res = await api.getStore()   //await fetch('/api/theme-config', { cache: 'no-store' });
-        console.log("Remote config",res)
+        //console.log("Remote config",res)
 
     if (!res) throw new Error('not found');
     return await res as Store;
@@ -339,7 +339,7 @@ async function fetchRemoteConfig(): Promise<Store | null> {
 
 // Merge remote config on top of defaults so partial configs still work
 function mergeConfig(remote: Partial<ThemeConfig>): ThemeConfig {
-  //console.log("remote config",remote)
+  ////console.log("remote config",remote)
   return {
     ...DEFAULT_CONFIG,
     ...remote,
@@ -392,7 +392,7 @@ const [store, setStore] = useState<Store | null>(_store)
       applyThemeCSS(resolved);
       setCache(remote!);
       setLoading(false);
-      console.log("Remote:",remote)
+      //console.log("Remote:",remote)
     })();
 
   }, []);

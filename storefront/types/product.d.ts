@@ -50,7 +50,7 @@ export interface ProductBySlugResponse{
 }
 
 export interface ProductSearchResponse{
-  data:{
+
     productSearch:Product[]
-  }
+  
 }

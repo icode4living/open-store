@@ -16,6 +16,7 @@ query MyWishList{
             product{
             name
             salePrice
+            slug
             mainImageURL
             }
         }

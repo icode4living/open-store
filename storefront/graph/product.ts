@@ -51,6 +51,9 @@ query ProductSearch($search:String){
         id
         name
         slug
+        shortDescription
+        salePrice
+        regularPrice
         mainImageURL
         
     }

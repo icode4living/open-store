@@ -1,6 +1,9 @@
 'use client';
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Navbar, MobileBottomNav } from '@/components/ui';
+import { useSession } from 'next-auth/react';
+import { api } from '@/lib/api';
+import { CustomerOrders } from '@/types/order';
 
 const MOCK_ORDERS = [
   { id: 'ORD-0012', date: '2026-02-15', status: 'Delivered',  total: 22000, items: 2, img: 'https://images.unsplash.com/photo-1602810318383-e386cc2a3ccf?w=80&q=60' },
@@ -20,7 +23,7 @@ const PROFILE_MENU = [
     title: 'Shopping',
     items: [
       { label: 'My Orders',    href: '/profile/orders',   icon: iconBox(),     desc: 'Track your deliveries' },
-      { label: 'Wishlist',     href: '/wishlist',          icon: iconHeart(),   desc: '3 saved items' },
+      { label: 'Wishlist',     href: '/profile/wishlist',          icon: iconHeart(),   desc: '3 saved items' },
       { label: 'Cart',         href: '/checkout',          icon: iconCart(),    desc: '2 items pending' },
     ],
   },
@@ -56,9 +59,39 @@ function formatNGN(n: number) {
   return new Intl.NumberFormat('en-NG', { style: 'currency', currency: 'NGN', minimumFractionDigits: 0 }).format(n);
 }
 
+const POINTS_PER_ORDER = 80;
+const GOLD_TIER_TARGET = 500;
+
 export default function ProfilePage() {
-  const [cartCount] = useState(2);
-  const [wishlistCount] = useState(3);
+  const [cartCount,setCartCount] = useState<number>(0);
+  const [wishlistCount,setWishlistCount] = useState<number>(0);
+  const { data: session } = useSession();
+  const [orders, setOrders] = useState<CustomerOrders[]>([]);
+
+  const loyaltyPoints = orders.length * POINTS_PER_ORDER;
+  const pointsToGold = Math.max(GOLD_TIER_TARGET - loyaltyPoints, 0);
+  const loyaltyProgress = Math.min((loyaltyPoints / GOLD_TIER_TARGET) * 100, 100);
+
+  //get cart, wishlist, and orders
+
+  useEffect(()=>{
+          if (!session?.user?.id) return;
+
+api.getCart().then(cart => {
+
+  setCartCount(cart?.items?.length || 0);
+  })
+api.getWishlist().then(wishlist => {
+  setWishlistCount(wishlist?.items?.length || 0);
+  })
+ api.getOrders(session.user.id)
+      .then((data) => {
+        setOrders(data ?? []);
+      })
+      .catch((error) => {
+      //  console.error('Failed to load orders:', error);
+      });
+  },[session?.user?.id]);
 
   return (
     <>
@@ -79,25 +112,26 @@ export default function ProfilePage() {
               </div>
 
               {/* Info */}
-              <div className="profile-hero__info">
-                <h1 className="profile-hero__name">Afolabi Samuel</h1>
-                <p className="profile-hero__email">samuelsamafolabi@outlook.com</p>
-                <p className="profile-hero__member">Member since January 2024</p>
-              </div>
+              {session?.user?.name && (
+                <div className="profile-hero__info">
+                  <h1 className="profile-hero__name">{session.user.name}</h1>
+                  <p className="profile-hero__email">{session.user.email}</p>
+                  <p className="profile-hero__member">{session.user.is_guest ? 'Guest' : 'Member'}</p>
+                </div>
+              )}
 
-              {/* Edit button */}
+              {/* Edit button 
               <a href="/profile/edit" className="profile-hero__edit-btn hide-mobile">
                 {iconEdit()} Edit Profile
-              </a>
+              </a>*/}
             </div>
 
             {/* Stats */}
             <div className="profile-stats">
               {[
-                { label: 'Orders',       value: '3' },
-                { label: 'Wishlist',     value: '3' },
-                { label: 'Reviews',      value: '1' },
-                { label: 'Points',       value: '240' },
+                { label: 'Orders', value: `${orders.length}` },
+                { label: 'Wishlist', value: `${wishlistCount}` },
+                { label: 'Points', value: `${loyaltyPoints}` },
               ].map((stat) => (
                 <div key={stat.label} className="profile-stats__item">
                   <span className="profile-stats__value">{stat.value}</span>
@@ -151,22 +185,22 @@ export default function ProfilePage() {
                   <a href="/profile/orders" className="profile-widget__see-all">See all →</a>
                 </div>
                 <div style={{ display: 'flex', flexDirection: 'column' }}>
-                  {MOCK_ORDERS.map((order, idx) => {
+                  {orders.map((order, idx) => {
                     const s = STATUS_COLORS[order.status] ?? { bg: '#eee', color: '#555' };
                     return (
                       <React.Fragment key={order.id}>
-                        <a href={`/profile/orders/${order.id}`} className="profile-order-item">
-                          <img src={order.img} alt="" className="profile-order-item__img" onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
+                        <a href={`/profile/orders`} className="profile-order-item">
+
                           <div className="profile-order-item__info">
-                            <p className="profile-order-item__id">{order.id}</p>
-                            <p className="profile-order-item__date">{new Date(order.date).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })} · {order.items} item{order.items > 1 ? 's' : ''}</p>
+                            <p className="profile-order-item__id">{order.ublinvoiceID}</p>
+                            <p className="profile-order-item__date">{new Date(order.createdAt).toLocaleDateString('en-NG', { day: 'numeric', month: 'short' })} · {order.items.length} item{order.items.length > 1 ? 's' : ''}</p>
                             <span className="profile-order-item__status" style={{ background: s.bg, color: s.color }}>
                               {order.status}
                             </span>
                           </div>
                           <p className="profile-order-item__total">{formatNGN(order.total)}</p>
                         </a>
-                        {idx < MOCK_ORDERS.length - 1 && <div style={{ height: 1, background: 'var(--color-border)', margin: '0 var(--space-md)' }} />}
+                        {idx < orders.length - 1 && <div style={{ height: 1, background: 'var(--color-border)', margin: '0 var(--space-md)' }} />}
                       </React.Fragment>
                     );
                   })}
@@ -177,13 +211,19 @@ export default function ProfilePage() {
               <div className="profile-loyalty">
                 <div className="profile-loyalty__top">
                   <p className="profile-loyalty__label">Loyalty Points</p>
-                  <p className="profile-loyalty__value">240 pts</p>
+                  <p className="profile-loyalty__value">{loyaltyPoints} pts</p>
                 </div>
                 <div className="profile-loyalty__bar-wrap">
                   <div className="profile-loyalty__bar">
-                    <div className="profile-loyalty__bar-fill" style={{ width: '48%' }} />
+                    <div className="profile-loyalty__bar-fill" style={{ width: `${loyaltyProgress}%` }} />
                   </div>
-                  <p className="profile-loyalty__hint">260 pts to Gold tier</p>
+                  <p className="profile-loyalty__hint">
+                    {orders.length === 0
+                      ? 'Place your first order to start earning rewards'
+                      : pointsToGold > 0
+                        ? `${pointsToGold} pts to Gold tier`
+                        : 'Gold tier unlocked'}
+                  </p>
                 </div>
                 <a href="/profile/rewards" className="profile-loyalty__cta">View Rewards →</a>
               </div>

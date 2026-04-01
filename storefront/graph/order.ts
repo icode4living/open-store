@@ -8,6 +8,7 @@ id
 status
 total
 createdAt
+ublinvoiceID
 items{
   id
   productImage

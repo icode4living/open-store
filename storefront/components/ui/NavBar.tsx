@@ -1,6 +1,8 @@
 
 'use client';
+import { api } from '@/lib/api';
 import { Product } from '@/types/product';
+import { useSession } from 'next-auth/react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 type Navs ={
   label: string;
@@ -15,6 +17,7 @@ export interface NavbarProps {
   cartCount?: number;
   wishlistCount?: number;
   category?:Category[];
+  isLoginedIn?:boolean;
   navs?:Navs[];
 }
 
@@ -39,7 +42,7 @@ const CATEGORIES: Category[] = [
 
 const SIDEBAR_EXTRAS = [
   { label: 'My Profile',   href: '/profile',          icon: iconProfile() },
-  { label: 'Wishlist',     href: '/wishlist',          icon: iconHeart() },
+  { label: 'Wishlist',     href: '/profile/wishlist',          icon: iconHeart() },
   { label: 'My Orders',    href: '/profile/orders',    icon: iconBox() },
   { label: 'Blog',         href: '/blog',              icon: iconArticle() },
   { label: 'Sign In',      href: '/auth/login',       icon: iconLock() },
@@ -109,7 +112,6 @@ function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
       const q = debouncedQuery.toLowerCase();
 
     // Replace with real API: api.searchProducts(debouncedQuery)
-   import('@/lib/api').then(({ api }) =>
 
       api.productSearch(q).then(( data) => {
         /*const filtered = data.products.filter(
@@ -118,12 +120,17 @@ function SearchOverlay({ isOpen, onClose }: SearchOverlayProps) {
             p.shortDescription?.toLowerCase().includes(q) ||
             p.slug.toLowerCase().includes(q)
         );*/
+       // console.log('Search results:', data);
         setResults(data);
         setLoading(false);
-      })
-    );
+      
     
-  }, [debouncedQuery]);
+   }).catch((err) => {
+      setResults([]);
+      setLoading(false);
+      console.error('Search error:', err);
+    })
+    }, [debouncedQuery]);
 
   // Close on Escape
   useEffect(() => {
@@ -356,11 +363,10 @@ function MobileSidebar({ isOpen, onClose }: SidebarProps) {
 // ═══════════════════════════════════════════════════
 // MAIN NAVBAR EXPORT
 // ═══════════════════════════════════════════════════
-export function Navbar({ cartCount = 0, wishlistCount = 0, navs =NAV_LINKS }: NavbarProps) {
+export function Navbar({ cartCount = 0, wishlistCount = 0, navs =NAV_LINKS , isLoginedIn=false}: NavbarProps) {
   const [searchOpen, setSearchOpen] = useState(false);
   const [sidebarOpen, setSidebarOpen] = useState(false);
-
-  return (
+return (
     <>
       <header className="navbar">
         {/* Hamburger — mobile only */}
@@ -394,10 +400,10 @@ export function Navbar({ cartCount = 0, wishlistCount = 0, navs =NAV_LINKS }: Na
           >
             {iconSearch()}
           </button>
-          <a href="/auth/login" className="navbar__icon-btn hide-mobile" aria-label="Account">
+          <a href={isLoginedIn ? "/profile" : "/auth/login"} className="navbar__icon-btn hide-mobile" aria-label="Account">
             {iconProfile()}
           </a>
-          <a href="/wishlist" className="navbar__icon-btn hide-mobile" aria-label="Wishlist">
+          <a href="/profile/wishlist" className="navbar__icon-btn hide-mobile" aria-label="Wishlist">
             {iconHeart()}
             {wishlistCount > 0 && <span className="navbar__cart-count">{wishlistCount}</span>}
           </a>
@@ -413,7 +419,8 @@ export function Navbar({ cartCount = 0, wishlistCount = 0, navs =NAV_LINKS }: Na
 
       <style>{NAVBAR_STYLES}</style>
     </>
-  );
+    )
+  
 }
 
 // ═══════════════════════════════════════════════════

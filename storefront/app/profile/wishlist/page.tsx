@@ -1,6 +1,6 @@
 // app/wishlist/page.tsx — Wishlist Page
 'use client';
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, use } from 'react';
 import { Navbar, MobileBottomNav } from '@/components/ui';
 import { ProductCard } from '@/components/ui';
 import { Product } from '@/types/product';
@@ -8,6 +8,7 @@ import { Button } from '@/components/ui';
 import { api } from '@/lib/api';
 import { Wishlist } from '@/types/wislist';
 import { useSession } from 'next-auth/react';
+import useTheme from '@/lib/useTheme';
 
 export default function WishlistPage() {
   const [product, setAllProducts] = useState<Product[]>([]);
@@ -15,19 +16,30 @@ export default function WishlistPage() {
   const [cartCount, setCartCount]     = useState(0);
   const [loading, setLoading]         = useState(true);
   const [toast, setToast]             = useState<string | null>(null);
-
+  const { config, loading: themeLoading, store } = useTheme();
+    const { data: session } = useSession();
+  
+useEffect(() => {
+    api.getProducts().then((data) => {
+      setAllProducts(data);
+    }).catch((err)=>{
+     // console.error(err)
+    });
+  }, []);
   useEffect(() => {
     api.getWishlist().then((data) => {
+      if(!data) return; 
       setWishlist(data);
       // In a real app: load wishlist IDs from localStorage / API
       // For demo, pre-populate with first 3 items
-     // setWishlist(new Set(data.products.slice(0, 3).map((p) => p.id)));
+     // setWish9list(new Set(data.products.slice(0, 3).map((p) => p.id)));
       setLoading(false);
+    }).catch((err)=>{
+      showToast(`Error loading wishlist`);
+     setLoading(false);
     });
-    api.getProducts().then((data)=>{
-      setAllProducts(product)
-    })
   }, []);
+  
 
   //const wishlist.items.= wishlist.filter((p) => wishlist.has(p.id));
 /*
@@ -68,7 +80,7 @@ export default function WishlistPage() {
 
   return (
     <>
-      <Navbar cartCount={cartCount} wishlistCount={wishlist?.items.length} />
+      <Navbar cartCount={cartCount} wishlistCount={wishlist?.items.length} isLoginedIn={!!session?.user?.id} />
 
       <main style={{ background: 'var(--color-surface)', minHeight: '100vh' }}>
         {/* Page header */}
@@ -84,9 +96,10 @@ export default function WishlistPage() {
                 <h1 style={{ fontFamily: 'var(--font-display)', fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 300, color: 'white' }}>
                   My Wishlist
                 </h1>
+                {wishlist &&
                 <p style={{ color: 'rgba(255,255,255,0.5)', marginTop: 'var(--space-sm)', fontSize: '0.85rem' }}>
                   {loading ? '—' : `${wishlist?.items.length} saved item${wishlist?.items.length !== 1 ? 's' : ''}`}
-                </p>
+                </p>}
               </div>
               {/*wishlist.items.length > 0 && !loading && (
                 <Button
@@ -108,7 +121,7 @@ export default function WishlistPage() {
                 <div key={i} style={{ aspectRatio: '3/4' }} className="skeleton" />
               ))}
             </div>
-          ) : wishlist?.items.length === 0 ? (
+          ) : wishlist?.items.length === 0 || !wishlist? (
             /* Empty state */
             <div className="wishlist-empty animate-fade-up">
               <div className="wishlist-empty__icon">
@@ -157,13 +170,14 @@ export default function WishlistPage() {
                       onAddToCart={handleAddToCart}
                       onWishlistToggle={()=>/*handleRemove*/null}
                       wishlisted={true}
-                      currency={}
+                      currency={store?.currency ||"NGN"}
                     />
                   </div>
                 ))}
               </div>
 
               {/* You might also like */}
+{wishlist?.items.length > 0 &&
               <div style={{ marginTop: 'var(--space-4xl)' }}>
                 <div className="section-header">
                   <p className="section-header__eyebrow">Recommendations</p>
@@ -190,12 +204,13 @@ export default function WishlistPage() {
                     ))}
                 </div>
               </div>
+}
             </>
           )}
         </div>
       </main>
 
-      <MobileBottomNav active="wishlist" cartCount={cartCount} wishlistCount={wishlist.size} />
+      <MobileBottomNav active="wishlist" cartCount={cartCount} wishlistCount={wishlist?.items.length || 0} />
 
       {toast && (
         <div className="toast">

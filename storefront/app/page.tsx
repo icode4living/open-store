@@ -138,6 +138,9 @@ const [categories, setCategories] = useState<Category[]>([])
     if (!session?.user?.id) return  showToast(`Login to create wishlist...`);
     api.addToWishList(id).then(()=>{
       showToast("Item added to cart")
+    }).catch((err)=>{
+      console.error(err)
+      showToast("Error adding item to wishlist")
     })
   };
 
@@ -150,7 +153,7 @@ const [categories, setCategories] = useState<Category[]>([])
 
   return (
     <>
-      <Navbar cartCount={cartCount} wishlistCount={wishlist.size} />
+      <Navbar cartCount={cartCount} wishlistCount={wishlist.size}  isLoginedIn={!!session} />
 
       <main>
         {/* ── 1. Hero Banner ─────────────────────────────────────── */}

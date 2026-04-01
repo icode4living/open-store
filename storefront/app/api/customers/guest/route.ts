@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import crypto from "crypto";
-import { serverClient } from "@/lib/api";
-import { Order } from "@/types/order";
 
 export async function POST(req: NextRequest) {
   try {
@@ -19,32 +17,41 @@ export async function POST(req: NextRequest) {
       .digest("hex");
 
     // 3. Forward request to Go backend
-    const backendResponse = await serverClient.post<Order>(
-      "/orders/checkout",
-      body,
+    const backendResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_API_URL}/customers/guest`,
       {
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "X-Store-Identity": process.env.API_KEY || "",
           "X-Store-Signature": signature,
-          // Forward incoming cookies (auth/session)
           Cookie: req.headers.get("cookie") || "",
         },
-        withCredentials: true,
+        body: bodyString,
+        credentials: "include",
       }
     );
 
+    const data = await backendResponse.json();
+
     // 4. Create Next.js response
-    const res = NextResponse.json(backendResponse)
+    const res = NextResponse.json(data, {
+      status: backendResponse.status,
+    });
 
     // 5. Forward Set-Cookie from backend → browser
-  
+    const setCookie = backendResponse.headers.get("set-cookie");
+
+    if (setCookie) {
+      res.headers.append("Set-Cookie", setCookie);
+    }
 
     return res;
   } catch (error: any) {
+    console.log("[Guest Error ]", error?.response?.data || error.message);
     return NextResponse.json(
       {
-        error: "Checkout failed",
+        error: "Guest Checkout failed",
         details: error?.response?.data || error.message,
       },
       { status: error?.response?.status || 500 }

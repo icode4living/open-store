@@ -61,7 +61,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       <div className="product-card__image-wrap">
         <img
           src={imgSrc}
-          alt={product.name}
+          alt={product.shortDescription || product.name}
           onError={() => setImgError(true)}
           className={`product-card__image${hovered ? ' product-card__image--hovered' : ''}`}
           loading="lazy"
@@ -100,7 +100,7 @@ export const ProductCard: React.FC<ProductCardProps> = ({
       {/* Info */}
       <div className="product-card__info">
         <p className="product-card__category t-caption">Fashion</p>
-        <h3 className="product-card__name"><Link href={`${product.slug}`}>{product.name}</Link></h3>
+        <h3 className="product-card__name"><Link href={`/product/${product.slug}`}>{product.name}</Link></h3>
         <p className="product-card__desc t-body-sm">{product.shortDescription}</p>
         <div className="product-card__price-row">
           <span className="product-card__price">{formattedPrice}</span>

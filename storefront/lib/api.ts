@@ -20,6 +20,7 @@ import { Category, CategoryResponse } from '@/types/category';
 import { Console } from 'console';
 import { AddToWishlist, MyWishlist, Wishlist } from '@/types/wislist';
 import { CREATE_WISHLIST, GET_WISHLIST } from '@/graph/wishlist';
+import crypto from "crypto";
 
 export const restClient =  new RestClient({
   baseURL : "/api",
@@ -137,7 +138,9 @@ const { data, error: gqlError } = await client.query<ProductSearchResponse>({
       fetchPolicy: 'network-only',
     });
         if (gqlError) return new Error(gqlError.message);
-    const resp = data?.data?.productSearch
+    const resp = data?.productSearch
+        //console.log("search data", resp)
+
     return resp
 
    }catch(e){
@@ -321,16 +324,33 @@ return result
    }
   },
   async login (email: string, password: string): Promise<Customer> {
-   try{
-    console.log(`EMAIL: ${email} \n PASSWORD: ${password}`)
-const result = await serverClient.post<Customer>('/customers/login',{
-  data:{
+    const bodyString = JSON.stringify({
 
     "email":email,
     "password":password
-  }
-  
-});
+  })
+      const adminKey = process.env.STORE_SIGNING_KEY!;
+  const secretBytes = Buffer.from(adminKey, "hex");
+    const signature = crypto
+        .createHmac("sha256", secretBytes)
+        .update(bodyString)
+        .digest("hex");
+    
+   try{
+    console.log(`EMAIL: ${email} \n PASSWORD: ${password}`)
+const result = await serverClient.post<Customer>('/customers/login',
+  bodyString,
+   {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Store-Identity": process.env.API_KEY || "",
+        "X-Store-Signature": signature,
+        // Forward cookies/auth from the browser
+       // Cookie: req.headers.get("cookie") || "",
+      },
+      withCredentials: true,
+    }
+);
 
 
  console.error("[LOGIN BUG]: ", result)

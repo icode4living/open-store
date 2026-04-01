@@ -1,11 +1,24 @@
-import NextAuth, { NextAuthOptions } from "next-auth";
+import NextAuth, { type NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+
 import { api } from "@/lib/api";
-import { Customer } from "@/types/customer";
+import type { Customer } from "@/types/customer";
 
+type AuthUser = {
+  id: string;
+  email: string;
+  name: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  is_guest: boolean;
+  cart_id: string;
+};
 
+const buildName = (firstName?: string, lastName?: string) =>
+  [firstName, lastName].filter(Boolean).join(" ");
 
- export const authOptions: NextAuthOptions = {
+export const authOptions: NextAuthOptions = {
   providers: [
     CredentialsProvider({
       name: "Email & Password",
@@ -18,22 +31,26 @@ import { Customer } from "@/types/customer";
           return null;
         }
 
-            try {
-           // const apolloClient = createApolloClient();
-            const result  = await api.login(credentials.email, credentials.password)
-              console.log("login: ", result)
-          
-          if (!result?.id) return null;
+        try {
+          const result = (await api.login(
+            credentials.email,
+            credentials.password
+          )) as Customer;
+
+          if (!result?.id || !result?.email) {
+            return null;
+          }
 
           return {
             id: result.id,
-            first_name: result.first_name,
-            last_name: result.last_name,
-            phone: result.phone,
-            is_guest: result.is_guest,
-            cart_id: result.cart_id,
-           // accessToken: result.token,
-          };
+            email: result.email,
+            name: buildName(result.first_name, result.last_name),
+            first_name: result.first_name ?? "",
+            last_name: result.last_name ?? "",
+            phone: result.phone ?? "",
+            is_guest: Boolean(result.is_guest),
+            cart_id: result.cart_id ?? "",
+          } satisfies AuthUser;
         } catch (error) {
           console.error("Login error:", error);
           return null;
@@ -49,36 +66,52 @@ import { Customer } from "@/types/customer";
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
-        token.first_name = user.first_name;
-        token.last_name = user.last_name;
-        token.phone = user.phone;
-        token.is_guest = user.is_guest
-        token.cart_id = user.cart_id
+        const authUser = user as AuthUser;
+
+        token.sub = authUser.id;
+        token.id = authUser.id;
+        token.email = authUser.email;
+        token.name = authUser.name;
+        token.first_name = authUser.first_name;
+        token.last_name = authUser.last_name;
+        token.phone = authUser.phone;
+        token.is_guest = authUser.is_guest;
+        token.cart_id = authUser.cart_id;
       }
+
       return token;
     },
 
     async session({ session, token }) {
-      session.user.id = token.id as string;
-      session.user.first_name= token.first_name as string;
-      session.user.last_name = token.last_name as string;
-      session.user.is_guest = token.is_guest as boolean;
-      session.user.cart_id = token.cart_id as string;
-      session.user.phone = token.phone as string;
-      session.user.email = token.email as string;
+      session.user = {
+        ...session.user,
+        id: (token.id as string) ?? token.sub ?? "",
+        email: (token.email as string | null | undefined) ?? null,
+        name:
+          (token.name as string | undefined) ??
+          buildName(
+            token.first_name as string | undefined,
+            token.last_name as string | undefined
+          ),
+        first_name: (token.first_name as string | undefined) ?? "",
+        last_name: (token.last_name as string | undefined) ?? "",
+        phone: (token.phone as string | undefined) ?? "",
+        is_guest: Boolean(token.is_guest),
+        cart_id: (token.cart_id as string | undefined) ?? "",
+      };
+
       return session;
     },
   },
 
   pages: {
     signIn: "/auth/login",
-    error: '/auth/error'
+    error: "/auth/error",
   },
 
   secret: process.env.NEXTAUTH_SECRET,
 };
+
 const handler = NextAuth(authOptions);
 
 export { handler as GET, handler as POST };

@@ -18,17 +18,20 @@ export async function POST(req: NextRequest) {
     .digest("hex");
 
   // 3. Forward to Go Backend
-  const response = await serverClient.post<Customer>("/customers/register", {
-    data: body,
-    headers: {
-      "Content-Type": "application/json",
-      "X-Store-Identity": process.env.API_KEY || "",
-      "X-Store-Signature": signature,
-      // Forward cookies/auth from the browser
-      "Cookie": req.headers.get("cookie") || "", 
-    },
-   // body: bodyString,
-  });
+  const response = await serverClient.post<Customer>(
+    "/customers/register",
+    body,
+    {
+      headers: {
+        "Content-Type": "application/json",
+        "X-Store-Identity": process.env.API_KEY || "",
+        "X-Store-Signature": signature,
+        // Forward cookies/auth from the browser
+        Cookie: req.headers.get("cookie") || "",
+      },
+      withCredentials: true,
+    }
+  );
 
   //const data = await response;
   return NextResponse.json(response);

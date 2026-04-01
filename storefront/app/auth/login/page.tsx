@@ -17,11 +17,16 @@ export function SignInPage() {
     setLoading(true); setError('');
    // await new Promise((r) => setTimeout(r, 1000));
     setLoading(false);
-    signIn('credentials', { email, password, redirect: false}).then(()=>{
-      //window.location.replace("/")
+    signIn('credentials', { email, password, redirect: false}).then((result)=>{
+      if (result?.error) {
+        setError('Invalid email or password');
+      } else {
+        window.location.replace("/");
+      }
     }).catch((e)=>{
       setError('Invalid email or password')
-      console.error("login error: ", e)})
+     // console.error("login error: ", e)
+    })
   };
 
   const handleGoogle = () => {

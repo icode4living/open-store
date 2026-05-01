@@ -6,9 +6,9 @@ query Products{
          node{
          id
         name
-        salePrice
-        regularPrice
-        costPrice
+         saleAmount
+        regularAmount
+        costAmount
         shortDescription
         mainImageURL
         slug
@@ -27,8 +27,9 @@ query ProductBySlug($slug:String!){
          stockQuantity
         stockStatus
         description
-        regularPrice
-        salePrice
+        saleAmount
+        regularAmount
+        costAmount
         mainImageURL
 
         galleryImages{

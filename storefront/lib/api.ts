@@ -308,13 +308,16 @@ return result
  * @param password 
  * @returns @interface Customer
  */
-  async registerCustomer (email: string, password: string): Promise<Customer | undefined> {
+  async registerCustomer (email: string, password: string,first_name:string, last_name:string,phone:string): Promise<Customer | undefined> {
    try{
 const result = await restClient.post<Customer>('/register-customer',{
-  data:{
+  
     email,
-    password
-  }
+    password,
+    first_name,
+    last_name,
+    phone
+  
 });
 return result
    }catch(e){

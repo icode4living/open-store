@@ -1,17 +1,57 @@
 'use client'
 import { Button, Input } from "@/components/ui";
 import { useState } from "react";
-
+import {api} from "@/lib/api"
+import { signIn } from "next-auth/react";
 export default function SignUpPage() {
-  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '' });
+  const [form, setForm] = useState({ firstName: '', lastName: '', email: '', password: '',phone:'' });
   const [loading, setLoading] = useState(false);
 
-  const handleSignUp = async () => {
-    setLoading(true);
-    await new Promise((r) => setTimeout(r, 1000));
-    setLoading(false);
-  };
+const handleSignUp = async () => {
+  setLoading(true);
 
+  try {
+    const response = await fetch('/api/register-customer', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        email: form.email,
+        password: form.password,
+        first_name: form.firstName, // Mapping frontend camelCase to backend snake_case
+        last_name: form.lastName,
+        phone: form.phone,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      // Handle 409 (Conflict), 403 (Forbidden), or 500 errors
+      throw new Error(data.error || 'Registration failed');
+    }
+
+    // If the response is successful and contains an ID
+    if (data && data.id) {
+         const result = await signIn('credentials', { 
+        email: form.email, 
+        password: form.password, 
+        redirect: false 
+      });
+if (result?.ok){
+      window.location.replace('/');
+
+}
+    }
+  } catch (error: any) {
+    console.error("Sign up error:", error.message);
+    // You might want to show a toast or alert here
+    alert(error.message);
+  } finally {
+    setLoading(false);
+  }
+};
   return (
     <div className="auth-page">
       <div className="auth-card animate-scale-in">
@@ -32,12 +72,14 @@ export default function SignUpPage() {
         <div className="auth-divider"><span>or</span></div>
 
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 'var(--space-lg)', marginBottom: 'var(--space-lg)' }}>
-          <Input type="text" label="First Name" placeholder="Afolabi" value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} />
-          <Input type="text" label="Last Name" placeholder="Samuel" value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} />
+          <Input type="text" label="First Name" placeholder="John" value={form.firstName} onChange={(v) => setForm({ ...form, firstName: v })} />
+          <Input type="text" label="Last Name" placeholder="Doe" value={form.lastName} onChange={(v) => setForm({ ...form, lastName: v })} />
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-lg)' }}>
           <Input type="email" label="Email" placeholder="you@example.com" value={form.email} onChange={(v) => setForm({ ...form, email: v })} />
           <Input type="text" label="Password" placeholder="Min. 8 characters" value={form.password} onChange={(v) => setForm({ ...form, password: v })} />
+                  <Input type="text" label="Mobile Number" placeholder="090124678889" value={form.phone} onChange={(v) => setForm({ ...form, phone: v })} />
+
         </div>
 
         <Button title="Create Account" action={handleSignUp} variant={loading ? 'disabled' : 'solid'} size="lg" loading={loading} classes="auth-submit-btn" />

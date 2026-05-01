@@ -15,7 +15,7 @@ query MyWishList{
             addedAt
             product{
             name
-            salePrice
+            saleAmount
             slug
             mainImageURL
             }

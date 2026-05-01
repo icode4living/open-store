@@ -6,17 +6,18 @@ interface GalleryImage{
 interface Product {
   id: string;
   name: string;
+  barcode?:string;
   slug?: string;
   stockQuantity?:number;
    stockStatus?: "instock" | "outofstock" | "onbackorder";
   status?: "pending" | "draft" | "private" | "publish";
   mainImageURL?: string | null;
   description?: string | null;
-  regularPrice?:number;
+  regularAmount?:number;
   shortDescription?: string;
   shippingClass?: ShippingClass | null;
-  salePrice?: number;
-  costPrice?: number;
+  saleAmount?: number;
+  costAmount?: number;
   galleryImages?: GalleryImage[];
 }
 //

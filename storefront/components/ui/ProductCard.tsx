@@ -3,13 +3,14 @@
 import Link from 'next/link';
 import React, { useState } from 'react';
 import { Product } from '@/types/product';
+import {formatMinorUnitToCurrency} from '@/lib/money';
 /*
 export interface Product {
   id: string;
   slug: string;
   name: string;
   shortDescription: string;
-  salePrice: number;
+  saleAmount: number;
   costPrice: number;
   mainImageURL: string;
   galleryImages: { url: string; productID: string }[];
@@ -34,16 +35,16 @@ export const ProductCard: React.FC<ProductCardProps> = ({
 }) => {
   const [hovered, setHovered] = useState(false);
   const [imgError, setImgError] = useState(false);
-
+/*
   const formattedPrice = new Intl.NumberFormat('en-NG', {
     style: 'currency',
     currency: currency,
     minimumFractionDigits: 0,
-  }).format(product.salePrice ||0.00);
-
-  const hasDiscount = product.regularPrice ? product.regularPrice < product.salePrice! : false
+  }).format(product.salePric ||0.00);
+*/
+  const hasDiscount = product.regularAmount? product.regularAmount< product.saleAmount! : false
   const discount = hasDiscount
-    ? Math.round(((product.regularPrice! - product.salePrice!) / product.salePrice!) * 100)
+    ? Math.round(((product.regularAmount! - product.saleAmount!) / product.saleAmount!) * 100)
     : 0;
 
   const imgSrc =
@@ -103,10 +104,13 @@ export const ProductCard: React.FC<ProductCardProps> = ({
         <h3 className="product-card__name"><Link href={`/product/${product.slug}`}>{product.name}</Link></h3>
         <p className="product-card__desc t-body-sm">{product.shortDescription}</p>
         <div className="product-card__price-row">
-          <span className="product-card__price">{formattedPrice}</span>
+          <span className="product-card__price">{formatMinorUnitToCurrency(product.saleAmount!, 'NGN')}</span>
           {hasDiscount && (
             <span className="product-card__cost">
-              {new Intl.NumberFormat('en-NG', { style: 'currency', currency: currency, minimumFractionDigits: 0 }).format(product.costPrice)}
+              {
+              formatMinorUnitToCurrency(product.regularAmount!, 'NGN')
+              /*new Intl.NumberFormat('en-NG', { style: 'currency', currency: currency, minimumFractionDigits: 0 }).format(product.costPrice)*/
+              }
             </span>
           )}
         </div>
